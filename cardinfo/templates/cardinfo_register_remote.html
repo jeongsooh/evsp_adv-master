@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block contents %}
+카드원격추가/카드원격추가/카드원격추가
+<div class="row mt-3 mx-3">
+  <div class="col-md-6 fw-bold"><h4>충전카드관리</h4></div>
+</div>
+<div class="row mt-3 mx-3">
+  <div class="col-md-6 fw-bold"><h5>카드원격추가</h5></div>
+</div>
+<div class="row mt-3 mx-3 bg-light">
+  <div class="col-12">
+    <form method="POST" action=".">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="mb-3">
+        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+        <input type="{{ field.field.widget.input_type }}" class="form-control" 
+              id="{{ field.id_for_label }}" placeholder="{{ field.label }}" name="{{ field.name }}" />
+      </div>
+      {% if field.errors %}
+      <span style="color: red">{{ field.errors }}</span>
+      {% endif %}
+      {% endfor %}
+      <button type="submit" class="btn btn-primary">카드추가</button>
+    </form>
+    <button class="btn btn-primary" onclick="javascript:history.go(-1);">돌아가기</button>
+  </div>
+</div>
+<script language="JavaScript">
+  function startCardReg() {
+    dataValue = {
+      memberId: id_userid,
+      machineNum: id_cpnumber,
+      cardNum: id_cardname
+    };
+    $.ajax({
+      type: "post",
+      url: "http://127.0.0.1:9001/webService/ocpp",
+      contentType: "application/json",
+      data: JSON.stringify(dataValue),
+      dataType: 'json',
+      success: function (data) {
+        var jsonData = JSON.parse(JSON.stringify(data));
+        if (jsonData.result == "success") {
+          $('#step-1').css('display', 'none');
+          $('#step-2').css('display', 'block');
+
+          setTimeout(checkCardRegStatus, checkCardRegStatusInterval);
+        } else if (jsonData.result == "session not found") {
+          alert("충전기가 서버에 연결되어 있지 않습니다.");
+        } else {
+          alert(jsonData.result);
+        }
+      },
+      error: function (xhr, status, error) {
+        var errorMessage = $.parseJSON(xhr.responseText);
+        alert(errorMessage.Message);
+      }
+    });
+  }
+  function cardRegCancel() {
+    if (confirm("카드등록을 취소하시겠습니까?") == false) return;
+    dataValue = {
+      memberId: id_userid,
+      machineNum: id_cpnumber
+    };
+    $.ajax({
+      type: "post",
+      url: "http://127.0.0.1:9001/webService/ocpp",
+      contentType: "application/json",
+      data: JSON.stringify(dataValue),
+      dataType: 'json',
+      success: function (data) {
+        $(".modal_wrap, .modalFrame, .modal_review").removeClass("actie");
+        $("#overlay").hide();
+        $("#overlay02").hide();
+      },
+      error: function (xhr, status, error) {
+        $(".modal_wrap, .modalFrame, .modal_review").removeClass("actie");
+        $("#overlay").hide();
+        $("#overlay02").hide();
+      }
+    });
+    $('#step-2').css('display', 'block');
+    $('#step-1').css('display', 'none');
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %} 
+
+{% block head %}
+<link rel="stylesheet" href="../../../static/style.css" />
+{% endblock %}
+
+{% block contents %} 
+<div class="container mt-3 mx-3">
+  <h4>충전이력 상세정보</h4>
+  <div class="row mt-5">
+    <div class="col-12">
+      <div class="form-group mb-3">
+        <label for="cpname" class="">충전기이름</label>
+        <input type="text" class="form-control" id="cpname" value="{{ charginginfo.cpname }}" readonly/>
+        <label for="chargedname" class="">회원이름</label>
+        <textarea class="form-control" readonly>{{ charginginfo.chargedname }}</textarea>
+        <label for="energy" class="">충전기이름</label>
+        <input type="text" class="form-control" id="energy" value="{{ charginginfo.energy }}" readonly/>
+        <label for="amount" class="">충전기이름</label>
+        <input type="text" class="form-control" id="amount" value="{{ charginginfo.amount }}" readonly/>
+      </div>
+      <div class="d-grid gap-2 d-md-block">
+        <a class="btn btn-primary" href="/charginginfoupdate/{{ charginginfo.id }}" role="button">충전이력정보수정</a>
+        <button class="btn btn-primary" onclick="javascript:history.go(-1);">돌아가기</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 
+
+{% block script %}
+<script src="../../../static/script.js"></script>
+{% endblock %}

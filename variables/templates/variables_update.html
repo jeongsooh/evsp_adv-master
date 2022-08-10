@@ -1,0 +1,25 @@
+{% extends "base.html" %} 
+
+{% block head %}
+<link rel="stylesheet" href="../../../static/style.css" />
+{% endblock %}
+
+{% block contents %} 
+<div class="container mt-3 mx-3">
+  <h4>운용변수 수정</h4>
+  <div class="row mt-5">
+    <div class="col-12">
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input class="btn btn-primary mt-3" type="submit" value="운용변수 수정" />
+        <button class="btn btn-primary mt-3" onclick="javascript:history.go(-1);">돌아가기</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %} 
+
+{% block script %}
+<script src="../../../static/script.js"></script>
+{% endblock %}S

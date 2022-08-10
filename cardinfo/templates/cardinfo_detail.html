@@ -1,0 +1,29 @@
+{% extends "base.html" %} 
+
+{% block head %}
+<link rel="stylesheet" href="../../../static/style.css" />
+{% endblock %}
+
+{% block contents %} 
+<div class="container mt-3 mx-3">
+  <h4>충전카드 상세정보</h4>
+  <div class="row mt-5">
+    <div class="col-12">
+      <div class="form-group mb-3">
+        <label for="cardname" class="">카드이름</label>
+        <input type="text" class="form-control" id="cardname" value="{{ cardinfo.cardname }}" readonly/>
+        <label for="username" class="">회원이름</label>
+        <textarea class="form-control" readonly>{{ cardinfo.username }}</textarea>
+      </div>
+      <div class="d-grid gap-2 d-md-block">
+        <a class="btn btn-primary" href="/cardupdate/{{ cardinfo.id }}" role="button">충전카드정보수정</a>
+        <button class="btn btn-primary" onclick="javascript:history.go(-1);">돌아가기</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 
+
+{% block script %}
+<script src="../../../static/script.js"></script>
+{% endblock %}

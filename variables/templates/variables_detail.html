@@ -1,0 +1,29 @@
+{% extends "base.html" %} 
+
+{% block head %}
+<link rel="stylesheet" href="../../../static/style.css" />
+{% endblock %}
+
+{% block contents %} 
+<div class="container mt-3 mx-3">
+  <h4>운용변수 상세정보</h4>
+  <div class="row mt-5">
+    <div class="col-12">
+      <div class="form-group mb-3">
+        <label for="group" class="">기준변수</label>
+        <input type="text" class="form-control" id="group" value="{{ variables.group }}" readonly/>
+        <label for="interval" class="">확인주기</label>
+        <input type="text" class="form-control" id="interval" value="{{ variables.interval }}" />
+      </div>
+      <div class="d-grid gap-2 d-md-block">
+        <a class="btn btn-primary" href="/variablesupdate/{{ variables.id }}" role="button">운용변수수정</a>
+        <button class="btn btn-primary" onclick="javascript:history.go(-1);">돌아가기</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 
+
+{% block script %}
+<script src="../../../static/script.js"></script>
+{% endblock %}
