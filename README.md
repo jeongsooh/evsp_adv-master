@@ -74,5 +74,7 @@ INFO:daphne.server:Listening on TCP address 127.0.0.1:8000
 ```
 ## 간단한 사용
 1. 사용자 계정
-기본 사용자 jeongsooh1 / 1234 --> http://127.0.0.1:8000/
+기본 사용자 jeongsooh1 / 1234 --> http://127.0.0.1:8000/  
 Super 사용자 jeongsoo / 1234  --> http://127.0.0.1:8000/admin
+2. 간단 Client
+3. 기타
