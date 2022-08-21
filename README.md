@@ -80,8 +80,8 @@ INFO:daphne.server:Listening on TCP address 127.0.0.1:8000
 
 ## 시스템 동작환경 구성
 ### django 기반의 EVSP 구성
-Cardinfo: 사용자 인증용 card 등록 및 현황
-Charginginfo: 충전데이터 현황
+* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) Cardinfo: 사용자 인증용 card 등록 및 현황
+* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) Charginginfo: 충전데이터 현황
 Evcharger: 충전기 등록 및 현황
 Evuser: 회원등록 및 현황
 Variables: 시스템 운용과 관련된 설정값
@@ -94,3 +94,4 @@ consumer: channels 기반의 ocpp 서버모듈
 Central_system: 메시지 처리 모듈
 Client_gateway: CSMS -> CP datatransfer 처리를 위하여 임시로 작성한 코드
 ### 간단한 구성도
+![EVSP](https://user-images.githubusercontent.com/29830424/185800244-dfbc0d5d-4c72-4cb0-83b4-fe8070197707.JPG)
