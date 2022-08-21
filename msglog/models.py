@@ -5,7 +5,7 @@ from evcharger.models import Evcharger
 # Create your models here.
 
 class Msglog(models.Model):
-  cpname = models.CharField(max_length=128, verbose_name='충전기번호')
+  cpnumber = models.CharField(max_length=128, verbose_name='충전기번호')
   msg_direction = models.IntegerField(verbose_name='메세지오리진')
   msg_name = models.CharField(max_length=128, verbose_name='메세지이름')
   msg_content = models.TextField(verbose_name='메세지본문')

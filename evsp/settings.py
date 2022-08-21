@@ -48,9 +48,15 @@ INSTALLED_APPS += [
     'evuser',
     'msglog',
     'variables',
+    'clients',
 ]
 
 ASGI_APPLICATION = 'evsp.asgi.application'
+CHANNEL_LAYERS = {
+    'default':{
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -39,13 +39,7 @@ class CardinfoCreateRemoteForm(forms.Form):
         self.add_error('cpnumber', '충전기번호가 없는 번호입니다.')
         return
 
-      # if password != evuser.password:
-      #   self.add_error('password', '비밀번호가 틀렸습니다.')
-      # else:
-      #   self.user_id = evuser.id
       self.userid = evuser.id
       self.cpnumber = evcharger.id
       self.cardname = cardname
-      print('self.userid = %s' % self.userid)
-      print('self.cpnumber = %s' % self.cpnumber)
-      print('cardname = %s' % self.cardname)
+

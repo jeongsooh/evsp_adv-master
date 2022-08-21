@@ -3,29 +3,16 @@ from django.views.generic import ListView, CreateView, DeleteView, DetailView, U
 from django.views.generic.edit import FormView
 
 import json
+import uuid
 
 from .models import Cardinfo
 from .forms import CardinfoCreateRemoteForm
 
+from ocpp16.client_gateway import get_cardtag
 from ocpp16.consumers import Ocpp16Consumer
 from ocpp16.models import Ocpp16
 
 # Create your views here.
-
-def get_cardtag(cpnumber):
-  consumer = Ocpp16.objects.filter(cpname=cpnumber).values('consumer')
-  print(consumer)
-  # print(dir(ocpp[0]['consumer']))
-  # print(ocpp[0]['consumer'])
-  consumer16consumer = Ocpp16Consumer()
-  consumer16consumer['scope']['client'] = consumer 
-  print(dir(consumer16consumer))
-
-  msg = [2, "987654321", "DataTransfer", 
-    {"vendorId":"gresystem","messageId":"StartCardRegMode", "userId":"jeongsooh1"}
-  ]
-
-  consumer16consumer.send(text_data=json.dumps(msg))
 
 class CardinfoList(ListView):
   model = Cardinfo
@@ -71,19 +58,17 @@ class CardinfoCreateRemoteView(FormView):
   success_url = '/cardinfo'
 
   def form_valid(self, form):
-    cardtag = get_cardtag(form.data.get('cpnumber'))
-    # cardinfo = Cardinfo(
-    #   cardname = form.cardname,
-    #   userid=form.data.get('userid'),
-    #   cardtag='1010010112340003',
-    #   cardstatus='원격추가'
-    # )
-    # cardinfo.save()
+    cardname = form.data.get('cardname')
+    userid = form.data.get('userid')
+    cpnumber = form.data.get('cpnumber')
+    cardinfo = Cardinfo(
+      cardname = form.cardname,
+      userid=form.data.get('userid'),
+      cardstatus=cpnumber
+    )
+    cardinfo.save()
 
-    print(form.data.get('userid'))
-    print(form.data.get('cpnumber'))
-    print(form.cardname)
-    print(form)
+    cardtag = get_cardtag(cpnumber, userid)
 
     return super().form_valid(form) 
 

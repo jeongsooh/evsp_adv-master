@@ -74,6 +74,23 @@ INFO:daphne.server:Listening on TCP address 127.0.0.1:8000
 ```
 ## 간단한 사용
 1. 기본 사용자 계정 jeongsooh1 / 1234 --> http://127.0.0.1:8000/  
-2. Super  사용자 jeongsoo / 1234  --> http://127.0.0.1:8000/admin
+2. Super  사용자 jeongsooh / 1234  --> http://127.0.0.1:8000/admin
 3. 간단 Client
 4. 기타
+
+## 시스템 동작환경 구성
+### django 기반의 EVSP 구성
+Cardinfo: 사용자 인증용 card 등록 및 현황
+Charginginfo: 충전데이터 현황
+Evcharger: 충전기 등록 및 현황
+Evuser: 회원등록 및 현황
+Variables: 시스템 운용과 관련된 설정값
+Clients: 시스템운용에 필요한 모듈로 연결된 chargepoint 관련 현황
+Msglog: OCPP 메시지 로그와 관련된 부분 (사용하지 않음)
+Ocpp16: OCPP 서버로 msglog 기능 포함
+Simulator: OCPP16 client simulator로 본 시스템과는 상관없음. 소스 보관용 폴더
+### OCPP16 - CSMS 메세지 처리 모듈 구현
+consumer: channels 기반의 ocpp 서버모듈
+Central_system: 메시지 처리 모듈
+Client_gateway: CSMS -> CP datatransfer 처리를 위하여 임시로 작성한 코드
+### 간단한 구성도
