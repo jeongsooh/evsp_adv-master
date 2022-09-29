@@ -7,11 +7,6 @@ from clients.models import Clients
 from .models import Ocpp16
 from .central_system import ocpp_request, message_transfer
 
-# from .central_system import ocpp_request
-# from msglog.models import Msglog
-# from .models import Ocpp16
-# # from asgiref.sync import async_to_sync
-
 def channel_logging(cpnumber, channel_name):
   queryset = Clients.objects.filter(cpnumber=cpnumber).values()
 
@@ -76,7 +71,7 @@ class Ocpp16Consumer(WebsocketConsumer):
       if ocpp_conf_json == None:
         pass
       else:
-        print('OCPP Conf in consumer: Send To {} : {}'.format(cpnumber, ocpp_conf_json))
+        print('OCPP Conf : Send To {} : {}'.format(cpnumber, ocpp_conf_json))
         Ocpp16.objects.create(
           msg_direction = ocpp_conf_json[0],
           connection_id = ocpp_conf_json[1],

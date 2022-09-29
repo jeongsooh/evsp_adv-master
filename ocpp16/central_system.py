@@ -42,7 +42,7 @@ def ocpp_request(ocpp_req):
         cpnumber = ocpp_req['cpnumber']
         queryset = Evcharger.objects.filter(cpnumber=cpnumber).values()
         if queryset.count() == 0:
-          status = "Invalid"
+          status = "Rejected"   # need to implement "Pending"
         else:
           status = "Accepted"
 
@@ -73,6 +73,18 @@ def ocpp_request(ocpp_req):
     elif ocpp_req['msg_name'] == 'StatusNotification':
         logging.info('========== Got a StatusNotification Req ==========')
 
+        cpnumber = ocpp_req['cpnumber']
+        queryset = Evcharger.objects.filter(cpnumber=cpnumber).values()
+        if queryset.count() == 0:
+          Print("OCPP Message Error: CP is not available")
+        else:
+          if ocpp_req['msg_content']['connectorId'] == 0:
+            Evcharger.objects.filter(cpnumber=cpnumber).update(connector_id_0_status=ocpp_req['msg_content']['status'])
+          if ocpp_req['msg_content']['connectorId'] == 1:
+            Evcharger.objects.filter(cpnumber=cpnumber).update(connector_id_1_status=ocpp_req['msg_content']['status'])
+          else:
+            pass
+
         ocpp_conf = [3, ocpp_req['connection_id'], {}]
         return ocpp_conf
 
@@ -102,7 +114,7 @@ def ocpp_request(ocpp_req):
               return ocpp_conf
           elif ocpp_req['msg_content']['messageId'] == "uvCardReg":
             print('Cardtag = ', ocpp_req['msg_content'])
-            Cardinfo.objects.filter(userid=ocpp_req['msg_content']['data']['memberId']).update(cardtag=ocpp_req['msg_content']['data']['token'], cardstatus='배포됨')
+            Cardinfo.objects.filter(userid=ocpp_req['msg_content']['data']['memberId'], cardstatus="처리중").update(cardtag=ocpp_req['msg_content']['data']['token'], cardstatus='배포됨')
             ocpp_conf = [3, ocpp_req['connection_id'],
             {
             "status":"Accepted"
@@ -115,35 +127,27 @@ def ocpp_request(ocpp_req):
             ocpp_conf = [3, ocpp_req['connection_id'], ocpp_req['msg_content']]
             return ocpp_conf
 
-
-
-    # @on(Action.DiagnosticsStatusNotification)
     # def on_diagnostics_status_notification(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
     elif ocpp_req['msg_name'] == 'DiagnosticsStatusNotification':
         logging.info('========== Got a Diagnostics Status Notification ==========')
         return call_result.DiagnosticsStatusNotification()
 
-    # @on(Action.FirmwareStatusNotification)
     # def on_firmware_status_notification(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
     elif ocpp_req['msg_name'] == 'FirmwareStatusNotification':
         logging.info('========== Got a Firmware Status Notification ==========')
         return call_result.FirmwareStatusNotification()
 
-    # @on(Action.MeterValues)
     # def on_metervalues(self, connector_id: int, meter_value: str, transaction_id: int):
+    # elif ocpp_req['msg_name'] == 'MeterValues' or 'MeterValue':
     elif ocpp_req['msg_name'] == 'MeterValues':
         logging.info('========== Got a MeterValue Req ==========')
-        return call_result.MeterValuesPayload()
+        ocpp_conf = [3, ocpp_req['connection_id'],{}]
+        return ocpp_conf
 
-    # @on(Action.StartTransaction)
     # def on_start_transaction(self, connector_id: int, id_tag: str, meter_start: int, timestamp: str, **kwargs):
     elif ocpp_req['msg_name'] == 'StartTransaction':
         logging.info('========== Got a StartTransaction Req ==========')
-        # return call_result.StartTransactionPayload(
-        #     transaction_id=ocpp_req['connection_id'],
-        #     id_tag_info={ 'parent_id_tag': ocpp_req['msg_content']['idTag'],
-        #         'status': RegistrationStatus.accepted }
-        # )
+
         ocpp_conf = [3, ocpp_req['connection_id'],
           {
             "transactionId" : ocpp_req['connection_id'],
@@ -152,70 +156,19 @@ def ocpp_request(ocpp_req):
           }]
         return ocpp_conf
 
-
-    # @on(Action.StopTransaction)
     # def on_stop_transaction(self, id_tag: str, meter_stop: int, timestamp: str, transaction_id: int):
-    #     logging.info('========== Got a StopTransaction Req ==========')
-    #     return call_result.StopTransactionPayload(
-    #         id_tag_info={ 'parent_id_tag': id_tag,
-    #             'status': RegistrationStatus.accepted }
-    #     )
+    elif ocpp_req['msg_name'] == 'StopTransaction':
+        logging.info('========== Got a StopTransaction Req ==========')
+        ocpp_conf = [3, ocpp_req['connection_id'],
+          {
+            "idTagInfo" : {'parentIdTag': ocpp_req['msg_content']['idTag'],
+                'status': 'Accepted' }
+          }]
+        return ocpp_conf
+
     else:
       pass
 
-    # async def cancel_reservation(self):
-    #     request = call.CancelReservationPayload(
-    #         revervation_id = 1
-    #     )
-
-    #     response = await self.call(request)
-    #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
-    #         print("Calcel Reservation is accepted.")
-    #         print("===================================")
-
-    # async def change_availability(self):
-    #     request = call.ChangeAvailabilityPayload(
-    #         connector_id = 1,
-    #         type = 'AvailabilityType'
-    #     )
-
-    #     response = await self.call(request)
-    #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
-    #         print("Change Availability is accepted.")
-    #         print("===================================")
-
-    # async def change_configuration(self):
-    #     request = call.ChangeConfigurationPayload(
-    #         key = 'str', 
-    #         value = 'Any'
-    #     )
-
-    #     response = await self.call(request)
-    #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
-    #         print("Change Configuration is accepted.")
-    #         print("===================================")
-
-    # async def clear_cache(self):
-    #     request = call.ClearCachePayload()
-
-    #     response = await self.call(request)
-    #     print("===================================")
-    #     print("Clear Cache transferred.....")
-    #     print("===================================")
-
-    # async def clear_charging_profile(self):
-    #     request = call.ClearChargingProfilePayload(
-    #         # options: id, connector_id, charging_profile_purpose, stack_level
-    #     )
-
-    #     response = await self.call(request)
-    #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
-    #         print("Clear Change Profile is accepted.")
-    #         print("===================================")
 
 def message_transfer(ocpp_req):
   print(dir(message_transfer))
@@ -243,155 +196,3 @@ def message_transfer(ocpp_req):
     #     print("Data Transfer is accepted.")
     #     print("===================================")
 
-
-
-    # async def get_composite_schedule(self):
-    #     request = call.GetCompositeSchedulePayload(
-    #         connector_id = 1,
-    #         duration = 60
-    #     )
-
-    #     response = await self.call(request)
-    #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
-    #         print("Get Composite Schedule is accepted.")
-    #         print("===================================")
-
-    # async def get_configuration(self):
-    #     request = call.GetConfigurationPayload(
-    #         # options : key
-    #     )
-
-    #     response = await self.call(request)
-    #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
-    #         print("Get Configuration is accepted.")
-    #         print("===================================")
-
-    # async def get_diagnostics(self):
-    #     request = call.GetDiagnosticsPayload(
-    #         location = 'str'
-    #         # options : retries, retry_interval, start_time, stop_time
-    #     )
-
-    #     response = await self.call(request)
-    #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
-    #         print("Get Diagnostics is accepted.")
-    #         print("===================================")
-
-    # async def get_local_list_version(self):
-    #     request = call.GetLocalListVersionPayload()
-
-    #     response = await self.call(request)
-    #     print("===================================")
-    #     print("Get Local List Version transferred.....")
-    #     print("===================================")
-
-    # async def remote_start_transaction(self):
-    #     request = call.RemoteStartTransactionPayload(
-    #         id_tag = 'str'
-    #         # options : connector_id, changing_profile
-    #     )
-
-    #     response = await self.call(request)
-    #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
-    #         print("Remote Start Transaction is accepted.")
-    #         print("===================================")
-
-    # async def remote_stop_transaction(self):
-    #     request = call.RemoteStopTransactionPayload(
-    #         transaction_id = 1
-    #     )
-
-    #     response = await self.call(request)
-    #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
-    #         print("Remote Stop Transaction is accepted.")
-    #         print("===================================")
-
-    # async def reserve_now(self):
-    #     request = call.ReserveNowPayload(
-    #         connector_id = 1,
-    #         expiry_date = "datatime str",
-    #         id_tag = 'str',
-    #         reservation_id = 1, 
-    #         # options: parent_id_tag
-    #     )
-
-    #     response = await self.call(request)
-    #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
-    #         print("Reserve Now is accepted.")
-    #         print("===================================")
-
-    # async def reset(self):
-    #     request = call.ResetPayload(
-    #         type = 'Reset Type'
-    #     )
-
-    #     response = await self.call(request)
-    #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
-    #         print("Reset is accepted.")
-    #         print("===================================")
-
-    # async def send_local_list(self):
-    #     request = call.SendLocalListPayload(
-    #         type = 'Reset Type'
-    #     )
-
-    #     response = await self.call(request)
-    #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
-    #         print("Send Local List is accepted.")
-    #         print("===================================")
-
-    # async def set_charging_profile(self):
-    #     request = call.SetChargingProfilePayload(
-    #         connector_id = 1,
-    #         cs_charging_profiles = 'Dict'
-    #     )
-
-    #     response = await self.call(request)
-    #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
-    #         print("Set Charging Profile is accepted.")
-    #         print("===================================")
-
-    # async def trigger_message(self):
-    #     request = call.TriggerMessagePayload(
-    #         requested_message = 'MessageTrigger'
-    #         # connector_id: Optional[int] = None
-    #     )
-
-    #     response = await self.call(request)
-    #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
-    #         print("Trigger Message is accepted.")
-    #         print("===================================")
-
-    # async def unlock_connector(self):
-    #     request = call.UnlockConnectorPayload(
-    #         connector_id = 1
-    #     )
-
-    #     response = await self.call(request)
-    #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
-    #         print("Unlock Connector is accepted.")
-    #         print("===================================")
-
-    # async def update_firmware(self):
-    #     request = call.UpdateFirmwarePayload(
-    #         location = 'str',
-    #         retrieve_date = 'datetime str'
-    #         # options: retries: int, retry_interval: int
-    #     )
-
-    #     response = await self.call(request)
-    #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
-    #         print("Update Firmware is accepted.")
-    #         print("===================================")

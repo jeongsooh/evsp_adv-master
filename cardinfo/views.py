@@ -64,7 +64,7 @@ class CardinfoCreateRemoteView(FormView):
     cardinfo = Cardinfo(
       cardname = form.cardname,
       userid=form.data.get('userid'),
-      cardstatus=cpnumber
+      cardstatus="처리중"
     )
     cardinfo.save()
 
