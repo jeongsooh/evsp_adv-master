@@ -1,6 +1,10 @@
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView, UpdateView, CreateView, DeleteView
+from django.views.generic.edit import FormView
 from .models import Evcharger
+from .forms import EvchargerResetForm
+
+from ocpp16.client_gateway import reset_evcharger
 
 # Create your views here.
 
@@ -45,3 +49,15 @@ class EvchargerDeleteView(DeleteView):
     model = Evcharger
     template_name='evcharger_confirm_delete.html'
     success_url = '/evcharger'
+
+class EvchargerResetView(FormView):
+  template_name = 'evcharger_reset.html'
+  form_class = EvchargerResetForm
+  success_url = '/evcharger'
+
+  def form_valid(self, form):
+    cpnumber = form.data.get('cpnumber')
+    reset_evcharger(cpnumber)
+
+    return super().form_valid(form) 
+

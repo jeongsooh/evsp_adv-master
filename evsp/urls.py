@@ -30,7 +30,7 @@ from cardinfo.views import (
     )
 from evcharger.views import (
     EvchargerList, EvchargerDetail, EvchargerUpdateView, 
-    EvchargerCreateView, EvchargerDeleteView
+    EvchargerCreateView, EvchargerDeleteView, EvchargerResetView
     )
 from msglog.views import (
     MsglogList,
@@ -61,6 +61,7 @@ urlpatterns = [
     path('cardupdate/<int:pk>/', CardinfoUpdateView.as_view(), name='cardupdate'),
     path('evcharger/', EvchargerList.as_view()),
     path('evcharger/<int:pk>/delete/', EvchargerDeleteView.as_view()),
+    path('evcharger/<int:pk>/reset/', EvchargerResetView.as_view()),
     path('evcharger/<int:pk>/', EvchargerDetail.as_view()),
     path('evcharger/register/', EvchargerCreateView.as_view()),
     path('cpupdate/<int:pk>/', EvchargerUpdateView.as_view(), name='cpupdate'),

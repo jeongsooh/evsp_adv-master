@@ -87,6 +87,7 @@
           <th scope="col">펌웨어버전</th>
           <th scope="col">등록일시</th>
           <th scope="col">충전기삭제</th>
+          <th scope="col">충전기리셋</th>
         </tr>
       </thead>
       <tbody class="text-dark">
@@ -103,6 +104,8 @@
           <th>{{ evcharger.register_dttm }}</th>
           <th><a class="btn btn-primary btn-sm btn-danger" id="evcharger-{{ evcharger.id }}" 
             href="/evcharger/{{ evcharger.id }}/delete" target="_blank">삭제</a></th>
+          <th><a class="btn btn-primary btn-sm btn-danger" id="evcharger-{{ evcharger.id }}" 
+            href="/evcharger/{{ evcharger.id }}/reset" target="_blank">리셋</a></th>
         </tr>
         {% endfor %}
       </tbody>

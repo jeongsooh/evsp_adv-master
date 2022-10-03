@@ -10,6 +10,7 @@ from clients.models import Clients
 from .consumers import Ocpp16Consumer
 
 def get_cardtag(cpnumber, userid):
+  response_timeout = 10
   vendorId = "gresystem"
   messageId = "uvStartCardRegMode"
   msg = {
@@ -23,7 +24,6 @@ def get_cardtag(cpnumber, userid):
         "msg_content": {'vendorId':vendorId,'messageId':messageId,'data': msg},
       }
 
-  consumer = Ocpp16Consumer()
   message = [2, ocpp_req['connection_id'], ocpp_req['msg_name'], ocpp_req['msg_content']]
   print('data transfer req: ', message)
   queryset = Clients.objects.filter(cpnumber=cpnumber).values()
@@ -34,10 +34,81 @@ def get_cardtag(cpnumber, userid):
     channel_name,
     {
       'type':'ocpp16_message',
-      'message':message 
+      'message': message 
     }
   )
 
+def reset_evcharger(cpnumber):
+  ocpp_req = {
+    "msg_direction" : 2,
+    "connection_id" : "",
+    "msg_name": "Reset",
+    "msg_content": {},
+  }
+  ocpp_request_to_cp(cpnumber, ocpp_req)
+
+
+def send_request(cpnumber, message):
+  print('OCPP Message : Send to {} : {}'.format(cpnumber, message))
+  queryset = Clients.objects.filter(cpnumber=cpnumber).values()
+  channel_name = queryset[0]['channel_name']
+
+  channel_layer = get_channel_layer()
+  async_to_sync(channel_layer.send)(
+    channel_name,
+    {
+      'type':'ocpp16_message',
+      'message': message 
+    }
+  )
+  # response = async_to_sync(channel_layer.receive)(channel_name)
+  # response = async_to_sync(channel_layer.receive)(
+  #   channel_name,
+  #   {
+  #     'type':'ocpp16_message',
+  #     'message': message 
+  #   }
+  # )
+  # print('async_to_sync response', response)
+
+def connectionid_logging(cpnumber, connection_id, msg_name):
+  queryset = Clients.objects.filter(cpnumber=cpnumber).values()
+
+  if queryset.count() == 0:
+    client = Clients(
+      cpnumber = cpnumber,
+      connection_id = connection_id,
+      channel_status= msg_name
+    )
+    client.save()
+    print('connection_id saved successfully')
+  else:
+    if not (queryset[0]['connection_id'] == connection_id):
+      Clients.objects.filter(cpnumber=cpnumber).update(connection_id=connection_id, channel_status=msg_name)
+      print('connection_id updated successfully')
+
+def ocpp_request_to_cp(cpnumber, ocpp_req):
+
+  global Job_List 
+
+  ocpp_req['msg_direction'] = 2
+  ocpp_req['connection_id'] = str(uuid.uuid4())
+
+  if ocpp_req['msg_name'] == 'Reset':
+    ocpp_req['msg_content'] = {
+      'type':'Reset Type',
+    }
+    message = [ocpp_req['msg_direction'], ocpp_req['connection_id'], ocpp_req['msg_name'], ocpp_req['msg_content']]
+    send_request(cpnumber, message)
+    connectionid_logging(cpnumber, ocpp_req['connection_id'], ocpp_req['msg_name'])
+  else:
+    pass
+
+
+
+
+  # response = Ocpp16Consumer.get_specific_response(unique_id=ocpp_req['connection_id'], timeout=response_timeout)
+  # print('CardReg response 3: ', response)
 
 
 
@@ -149,7 +220,7 @@ def get_cardtag(cpnumber, userid):
 
     #     response = await self.call(request)
     #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
+    #         print("===================================") 
     #         print("Remote Start Transaction is accepted.")
     #         print("===================================")
 
@@ -179,16 +250,16 @@ def get_cardtag(cpnumber, userid):
     #         print("Reserve Now is accepted.")
     #         print("===================================")
 
-    # async def reset(self):
-    #     request = call.ResetPayload(
-    #         type = 'Reset Type'
-    #     )
+# def reset(cpnumber):
+#   request = call.ResetPayload(
+#       type = 'Reset Type'
+#   )
 
-    #     response = await self.call(request)
-    #     if response.id_tag_info['status'] == RegistrationStatus.accepted:
-    #         print("===================================")
-    #         print("Reset is accepted.")
-    #         print("===================================")
+#   response = await self.call(request)
+#   if response.id_tag_info['status'] == RegistrationStatus.accepted:
+#       print("===================================")
+#       print("Reset is accepted.")
+#       print("===================================")
 
     # async def send_local_list(self):
     #     request = call.SendLocalListPayload(
