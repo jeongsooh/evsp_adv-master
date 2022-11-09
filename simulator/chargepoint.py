@@ -7,9 +7,9 @@ from ocpp.v16.enums import Action, RegistrationStatus
 
 class ChargePoint(cp):
     heartbeat_interval = 60
-    async def send_authorize(self):
+    async def send_authorize(self, id_tag):
         request = call.AuthorizePayload(
-            id_tag = "1010010112345680"
+            id_tag = id_tag
         )
 
         response = await self.call(request)
@@ -25,7 +25,6 @@ class ChargePoint(cp):
         )
 
         response = await self.call(request)
-        print('Response = ', response)
         if response.status == RegistrationStatus.accepted:
             self.heartbeat_interval = response.interval
             print("===================================")
@@ -98,39 +97,71 @@ class ChargePoint(cp):
         print("MeterValue transferred.....")
         print("===================================")
 
-    async def send_start_transaction(self):
+    async def send_start_transaction(self, id_tag):
         request = call.StartTransactionPayload(
             connector_id=1,
-            id_tag='1010010112345678',
-            meter_start=212,
+            id_tag=id_tag,
+            meter_start=594157,
             timestamp=datetime.now().isoformat()
+            # timestamp='2022-08-06T03:44:55.024Z'
         )
 
         response = await self.call(request)
         if response.id_tag_info['status'] == RegistrationStatus.accepted:
             print("===================================")
-            print("StartTransaction started. transaction_id: ", response.transaction_id)
+            print("StartTransaction started.")
             print("===================================")
 
     async def send_stop_transaction(self):
+        # request = call.StopTransactionPayload(
+        #     id_tag='0000000000150049',
+        #     meter_stop=597830,
+        #     timestamp='2022-10-26T17:31:50.004Z',
+        #     # timestamp=datetime.now().isoformat(),
+        #     transaction_id=1,
+        # )
+
         request = call.StopTransactionPayload(
-            id_tag='1010010112345678',
-            meter_stop=250,
-            timestamp=datetime.now().isoformat(),
-            transaction_id=3,
+            id_tag = '0000000000150049', 
+            meter_stop = 597830, 
+            reason = 'Local', 
+            timestamp = datetime.now().isoformat(), 
+            transaction_id = 1, 
+            transaction_data = [
+                {
+                    'timestamp' : '2022-10-26T17:31:49.000Z', 
+                    'sampledValue' : [
+                        {
+                            'value' : '3673.80', 
+                            'context' : 'Sample.Periodic', 
+                            'format' : 'Raw', 
+                            'measurand' : 'Energy.Active.Import.Register', 
+                            'unit' : 'Wh'
+                        },
+                        {
+                            'value' : '72.44', 
+                            'context' : 'Sample.Periodic', 
+                            'format' : 'Raw', 
+                            'measurand' : 'Temperature', 
+                            'unit' : 'Celcius'
+                        }
+                    ]
+                }
+            ]
         )
+
 
         response = await self.call(request)
         if response.id_tag_info['status'] == RegistrationStatus.accepted:
             print("===================================")
-            print("StopTransaction started. transaction_id: ")
+            print("StopTransaction started.")
             print("===================================")
 
     async def send_status_notification(self, cpstatus):
         request = call.StatusNotificationPayload(
             connector_id=1,
             error_code='NoError',
-            status='Available'
+            status=cpstatus
         )
 
         response = await self.call(request)
@@ -138,139 +169,140 @@ class ChargePoint(cp):
         print("StatusNotification transferred.....")
         print("===================================")
 
-    @on(Action.CancelReservation)
-    def on_cancel_reservation(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Boot Notification ==========')
-        return call_result.CancelReservationPayload(
-            status = 'CancelReservationStatus'
-        )
 
-    @on(Action.ChangeAvailability)
-    def on_change_availability(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Change Availability ==========')
-        return call_result.ChangeAvailabilityPayload(
-            status = 'AvailabilityStatus'
-        )
+    # @on(Action.CancelReservation)
+    # def on_cancel_reservation(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Boot Notification ==========')
+    #     return call_result.CancelReservationPayload(
+    #         status = 'CancelReservationStatus'
+    #     )
 
-    @on(Action.ChangeConfiguration)
-    def on_change_configuration(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Change Configuration ==========')
-        return call_result.ChangeConfigurationPayload(
-            status = 'ConfigurationStatus'
-        )
+    # @on(Action.ChangeAvailability)
+    # def on_change_availability(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Change Availability ==========')
+    #     return call_result.ChangeAvailabilityPayload(
+    #         status = 'AvailabilityStatus'
+    #     )
 
-    @on(Action.ChangeConfiguration)
-    def on_change_configuration(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Change Configuration ==========')
-        return call_result.ChangeConfigurationPayload(
-            status = 'ConfigurationStatus'
-        )
+    # @on(Action.ChangeConfiguration)
+    # def on_change_configuration(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Change Configuration ==========')
+    #     return call_result.ChangeConfigurationPayload(
+    #         status = 'ConfigurationStatus'
+    #     )
 
-    @on(Action.ClearCache)
-    def on_clear_cache(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Clear Cache ==========')
-        return call_result.ClearCachePayload(
-            status = 'ClearCacheStatus'
-        )
+    # @on(Action.ChangeConfiguration)
+    # def on_change_configuration(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Change Configuration ==========')
+    #     return call_result.ChangeConfigurationPayload(
+    #         status = 'ConfigurationStatus'
+    #     )
 
-    @on(Action.ClearChargingProfile)
-    def on_clear_charging_profile(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Clear Charging Profile ==========')
-        return call_result.ClearChargingProfilePayload(
-            status = 'ClearChargingProfileStatus'
-        )
+    # @on(Action.ClearCache)
+    # def on_clear_cache(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Clear Cache ==========')
+    #     return call_result.ClearCachePayload(
+    #         status = 'ClearCacheStatus'
+    #     )
 
-    @on(Action.GetCompositeSchedule)
-    def on_get_composite_schedule(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Get Composite Schedule ==========')
-        return call_result.GetCompositeSchedulePayload(
-            status = 'GetCompositeScheduleStatus'
-            # options: connector_id: int, schedule_start: str, charging_schedule: Dict
-        )
+    # @on(Action.ClearChargingProfile)
+    # def on_clear_charging_profile(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Clear Charging Profile ==========')
+    #     return call_result.ClearChargingProfilePayload(
+    #         status = 'ClearChargingProfileStatus'
+    #     )
 
-    @on(Action.GetConfiguration)
-    def on_get_configuration(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Get Configuration ==========')
-        return call_result.GetConfigurationPayload(
-            # options: configuration_key: List, unknown_key: List
-        )
+    # @on(Action.GetCompositeSchedule)
+    # def on_get_composite_schedule(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Get Composite Schedule ==========')
+    #     return call_result.GetCompositeSchedulePayload(
+    #         status = 'GetCompositeScheduleStatus'
+    #         # options: connector_id: int, schedule_start: str, charging_schedule: Dict
+    #     )
 
-    @on(Action.GetDiagnostics)
-    def on_get_diagnostics(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Get Diagnostics ==========')
-        return call_result.GetDiagnosticsPayload(
-            # options: file_name: str
-        )
+    # @on(Action.GetConfiguration)
+    # def on_get_configuration(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Get Configuration ==========')
+    #     return call_result.GetConfigurationPayload(
+    #         # options: configuration_key: List, unknown_key: List
+    #     )
 
-    @on(Action.GetLocalListVersion)
-    def on_get_local_list_version(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Get Local List Version ==========')
-        return call_result.GetLocalListVersionPayload(
-            list_version = 1
-        )
+    # @on(Action.GetDiagnostics)
+    # def on_get_diagnostics(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Get Diagnostics ==========')
+    #     return call_result.GetDiagnosticsPayload(
+    #         # options: file_name: str
+    #     )
 
-    @on(Action.RemoteStartTransaction)
-    def on_remote_start_transaction(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Remote Start Transaction ==========')
-        return call_result.RemoteStartTransactionPayload(
-            status = 'RemoteStartStopStatus'
-        )
+    # @on(Action.GetLocalListVersion)
+    # def on_get_local_list_version(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Get Local List Version ==========')
+    #     return call_result.GetLocalListVersionPayload(
+    #         list_version = 1
+    #     )
 
-    @on(Action.RemoteStopTransaction)
-    def on_remote_stop_transaction(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Remote Stop Transaction ==========')
-        return call_result.RemoteStopTransactionPayload(
-            status = 'RemoteStartStopStatus'
-        )
+    # @on(Action.RemoteStartTransaction)
+    # def on_remote_start_transaction(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Remote Start Transaction ==========')
+    #     return call_result.RemoteStartTransactionPayload(
+    #         status = 'RemoteStartStopStatus'
+    #     )
 
-    @on(Action.ReserveNow)
-    def on_reserve_now(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Reserve Now ==========')
-        return call_result.ReserveNowPayload(
-            status = 'ReservationStatus'
-        )
+    # @on(Action.RemoteStopTransaction)
+    # def on_remote_stop_transaction(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Remote Stop Transaction ==========')
+    #     return call_result.RemoteStopTransactionPayload(
+    #         status = 'RemoteStartStopStatus'
+    #     )
 
-    @on(Action.Reset)
-    def on_reset(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Reset ==========')
-        return call_result.ResetPayload(
-            status = 'ResetStatus'
-        )
+    # @on(Action.ReserveNow)
+    # def on_reserve_now(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Reserve Now ==========')
+    #     return call_result.ReserveNowPayload(
+    #         status = 'ReservationStatus'
+    #     )
 
-    @on(Action.SendLocalList)
-    def on_send_local_list(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Send Local List ==========')
-        return call_result.SendLocalListPayload(
-            status = 'UpdateStatus'
-        )
+    # @on(Action.Reset)
+    # def on_reset(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Reset ==========')
+    #     return call_result.ResetPayload(
+    #         status = 'ResetStatus'
+    #     )
 
-    @on(Action.SetChargingProfile)
-    def on_set_charging_profile(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Set Charging Profile ==========')
-        return call_result.SetChargingProfilePayload(
-            status = 'ChargingProfileStatus'
-        )
+    # @on(Action.SendLocalList)
+    # def on_send_local_list(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Send Local List ==========')
+    #     return call_result.SendLocalListPayload(
+    #         status = 'UpdateStatus'
+    #     )
 
-    @on(Action.TriggerMessage)
-    def on_trigger_message(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Trigger Message ==========')
-        return call_result.TriggerMessagePayload(
-            status = 'TriggerMessageStatus'
-        )
+    # @on(Action.SetChargingProfile)
+    # def on_set_charging_profile(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Set Charging Profile ==========')
+    #     return call_result.SetChargingProfilePayload(
+    #         status = 'ChargingProfileStatus'
+    #     )
 
-    @on(Action.UnlockConnector)
-    def on_unlock_connector(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Unlock Connector ==========')
-        return call_result.UnlockConnectorPayload(
-            status = 'UnlockStatus'
-        )
+    # @on(Action.TriggerMessage)
+    # def on_trigger_message(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Trigger Message ==========')
+    #     return call_result.TriggerMessagePayload(
+    #         status = 'TriggerMessageStatus'
+    #     )
 
-    @on(Action.UpdateFirmware)
-    def on_update_firmware(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        logging.info('========== Got a Update Firmware ==========')
-        return call_result.UpdateFirmwarePayload(
-            # pass
-        )
+    # @on(Action.UnlockConnector)
+    # def on_unlock_connector(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Unlock Connector ==========')
+    #     return call_result.UnlockConnectorPayload(
+    #         status = 'UnlockStatus'
+    #     )
+
+    # @on(Action.UpdateFirmware)
+    # def on_update_firmware(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
+    #     logging.info('========== Got a Update Firmware ==========')
+    #     return call_result.UpdateFirmwarePayload(
+    #         # pass
+    #     )
 
 
 

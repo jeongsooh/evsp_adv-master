@@ -4,7 +4,7 @@ from django.views.generic.edit import FormView
 from .models import Evcharger
 from .forms import EvchargerResetForm
 
-from ocpp16.client_gateway import reset_evcharger
+from ocpp16.client_gateway import reset_evcharger, update_evcharger
 
 # Create your views here.
 
@@ -58,6 +58,17 @@ class EvchargerResetView(FormView):
   def form_valid(self, form):
     cpnumber = form.data.get('cpnumber')
     reset_evcharger(cpnumber)
+
+    return super().form_valid(form) 
+
+class EvchargerFwupdateView(FormView):
+  template_name = 'evcharger_fwupdate.html'
+  form_class = EvchargerResetForm
+  success_url = '/evcharger'
+
+  def form_valid(self, form):
+    cpnumber = form.data.get('cpnumber')
+    update_evcharger(cpnumber)
 
     return super().form_valid(form) 
 

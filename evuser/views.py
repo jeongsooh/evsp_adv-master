@@ -17,6 +17,10 @@ def index(request):
     form = LoginForm()
   return render(request, 'index.html', {'form': form})
 
+def test(request):
+
+  return render(request, 'test.html')
+
 
 # class RegisterView(FormView):
 #   template_name = 'register.html'
@@ -35,7 +39,7 @@ def index(request):
 class EvuserCreateView(CreateView):
   model = Evuser
   template_name = 'evuser_register.html'
-  fields = ['userid', 'password']
+  fields = ['userid', 'password', 'name', 'email', 'phone', 'address']
   success_url = '/evuser'
 
 class EvuserDeleteView(DeleteView):

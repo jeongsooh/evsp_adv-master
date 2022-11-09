@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+<!-- humanize 기능을 이용해서 django에서 제공하는 각종 필터들을 이용할 수 있음
+이와 관련된 문서 (https://docs.djangoproject.com/en/4.0/ref/templates/builtins/) -->
+
+{% block header %}
+{% endblock %} -->
+
+{% block contents %}
+<div class="row mt-3 mx-3">
+  <div class="col-md-8 fw-bold"><h4>Active 충전기정보</h4></div>
+  <div class="col-md-2">
+    <select class="form-select form-select-sm" aria-label="Default select example">
+      <option selected>검색유형</option>
+      <option value="1">회원번호</option>
+      <option value="2">회원이름</option>
+      <option value="3">휴대폰번호</option>
+      <option value="4">충전기번호</option>
+      <option value="5">충전기이름</option>
+    </select>
+  </div>
+  <!-- <div class="col-md-2">
+    <select class="form-select form-select-sm" aria-label="Default select example">
+      <option selected>회원이름</option>
+      <option value="1">회원이름</option>
+      <option value="2">휴대폰번호</option>
+      <option value="3">회원번호</option>
+    </select>
+  </div> -->
+  <div class="col-md-2">
+    <form>
+      <div class="input-group input-group-sm">
+        <input type="text" class="form-control" placeholder="" aria-label="Recipient's userid" aria-describedby="button-addon2">
+        <button class="btn btn-primary" type="button" id="button-addon2">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="row mt-3 mx-3">
+  <div class="col-md-6 fw-bold"><h5>충전기정보</h5></div>
+  <div class="col-md-1 d-grid justify-content-md-end">
+    <button class="btn btn-primary btn-sm" 
+      onclick="location.href='/clients/register/'">충전기추가
+    </button>
+  </div>
+  <div class="col-md-2 d-grid justify-content-md-end">
+    <button class="btn btn-primary btn-sm" 
+      onclick="location.href='/clients/fwupdate/'">펌웨어업데이트
+    </button>
+  </div>
+  <div class="col-md-3">
+    <div class="row justify-content-end">
+      <label class="col form-select-sm text-end">정렬기준</label>
+      <select class="col form-select form-select-sm" aria-label="Default select example">
+        <option selected>회원이름</option>
+        <option value="1">회원이름</option>
+        <option value="2">휴대폰번호</option>
+        <option value="3">회원번호</option>
+      </select>
+    </div>
+  </div>
+</div>
+<div class="row mt-2 mx-2">
+  <div class="col-12">
+    <table class="table table-light">
+      <thead class="thead-light">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">충전기번호</th>
+          <th scope="col">채널상태</th>
+          <th scope="col">충전기상태</th>
+          <th scope="col">커넥션아이디</th>
+          <th scope="col">승인된카드테그</th>
+          <th scope="col">원격충전</th>
+          <th scope="col">원격충전정지</th>
+          <th scope="col">커넥터해제</th>
+          <th scope="col">캐쉬삭제</th>
+          <th scope="col">설정확인</th>
+          <th scope="col">설정변경</th>
+          <th scope="col">충전기삭제</th>
+          <th scope="col">충전기리셋</th>
+        </tr>
+      </thead>
+      <tbody class="text-dark">
+        {% for clients in clientsList %}
+        <tr>
+          <th scope="row">{{ clients.id }}</th>
+          <th><a id="clients-{{ clients.id }}" onmouseenter="clients_detail({{ clients.id }});" onmouseleave="clients_leave({{ clients.id }});"
+            href="/clients/{{ clients.id }}">{{ clients.cpnumber }}</a></th>
+          <th>{{ clients.channel_status }}</th>
+          <th>{{ clients.cpstatus }}</th>
+          <th>{{ clients.connection_id }}</th>
+          <th>{{ clients.authorized_tag }}</th>
+          <th><a class="btn btn-primary btn-sm btn-info" id="clients-{{ clients.id }}" 
+            href="/clients/{{ clients.id }}/remo_scs_cpf" target="_blank">원격충전</a></th>
+          <th><a class="btn btn-primary btn-sm btn-info" id="clients-{{ clients.id }}" 
+            href="/clients/{{ clients.id }}/remo_stop_cs" target="_blank">원격충전정지</a></th>
+          <th><a class="btn btn-primary btn-sm btn-info" id="clients-{{ clients.id }}" 
+            href="/clients/{{ clients.id }}/unlock_connector" target="_blank">커넥터해제</a></th>
+          <th><a class="btn btn-primary btn-sm btn-info" id="clients-{{ clients.id }}" 
+            href="/clients/{{ clients.id }}/clearcache" target="_blank">캐쉬삭제</a></th>
+          <th><a class="btn btn-primary btn-sm btn-info" id="clients-{{ clients.id }}" 
+            href="/clients/{{ clients.id }}/getconf" target="_blank">설정확인</a></th>
+          <th><a class="btn btn-primary btn-sm btn-info" id="clients-{{ clients.id }}" 
+            href="/clients/{{ clients.id }}/setconf" target="_blank">설정변경</a></th>
+          <th><a class="btn btn-primary btn-sm btn-danger" id="clients-{{ clients.id }}" 
+            href="/clients/{{ clients.id }}/delete" target="_blank">삭제</a></th>
+          <th><a class="btn btn-primary btn-sm btn-danger" id="clients-{{ clients.id }}" 
+            href="/clients/{{ clients.id }}/reset" target="_blank">리셋</a></th>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="pagination justify-content-center mt-5">
+      <ul class="step-links">
+        {% if page_obj.has_previous %}
+        <a class="btn btn-sm btn-outline-primary" href="?page=1">처음으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.previous_page_number }}">이전으로</a>
+        {% else %}
+        <a class="btn btn-sm btn-outline-primary disabled" href="#">처음으로</a>
+        <a class="btn btn-sm btn-outline-primary disabled" href="#">이전으로</a>
+        {% endif %}
+      <span class="current">
+        {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+      </span>
+        {% if page_obj.has_next %}
+        <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.next_page_number }}">다음으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.paginator.num_pages }}">마지막으로</a>
+        {% else %}
+        <a class="btn btn-sm btn-outline-primary disabled" href="#">다음으로</a>
+        <a class="btn btn-sm btn-outline-primary disabled" href="#">마지막으로</a>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

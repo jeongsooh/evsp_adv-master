@@ -18,7 +18,6 @@ class Evuser(models.Model):
 
   userid = models.CharField(max_length=64, verbose_name='회원아이디')
   password = models.CharField(max_length=128, verbose_name='비밀번호')
-  usernumber = models.CharField(max_length=64, verbose_name='회원번호')
   name = models.CharField(max_length=64, verbose_name='회원이름')
   email = models.EmailField(max_length=128, verbose_name='이메일')
   phone = models.CharField(max_length=64, verbose_name='전화번호')

@@ -8,6 +8,7 @@ class Clients(models.Model):
   channel_status = models.CharField(max_length=64, blank=True, verbose_name='채널상태')
   cp_status = models.CharField(max_length=64, blank=True, verbose_name='충전기상태')
   connection_id = models.CharField(max_length=256, blank=True, verbose_name='커넥션아이디')
+  authorized_tag = models.CharField(max_length=64, verbose_name='승인된 카드테그')
 
   def __str__(self):
     return self.cpnumber

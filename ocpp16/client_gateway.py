@@ -2,6 +2,7 @@ import asyncio
 import websockets
 import json
 import uuid
+from datetime import datetime
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -43,6 +44,69 @@ def reset_evcharger(cpnumber):
     "msg_direction" : 2,
     "connection_id" : "",
     "msg_name": "Reset",
+    "msg_content": {},
+  }
+  ocpp_request_to_cp(cpnumber, ocpp_req)
+
+def update_evcharger(cpnumber):
+  ocpp_req = {
+    "msg_direction" : 2,
+    "connection_id" : "",
+    "msg_name": "UpdateFirmware",
+    "msg_content": {},
+  }
+  ocpp_request_to_cp(cpnumber, ocpp_req)
+
+def clearcache_evcharger(cpnumber):
+  ocpp_req = {
+    "msg_direction" : 2,
+    "connection_id" : "",
+    "msg_name": "ClearCache",
+    "msg_content": {},
+  }
+  ocpp_request_to_cp(cpnumber, ocpp_req)
+
+def remotestart_evcharger(cpnumber):
+  ocpp_req = {
+    "msg_direction" : 2,
+    "connection_id" : "",
+    "msg_name": "RemoteStartTransaction",
+    "msg_content": {},
+  }
+  ocpp_request_to_cp(cpnumber, ocpp_req)
+
+def remotestop_evcharger(cpnumber):
+  ocpp_req = {
+    "msg_direction" : 2,
+    "connection_id" : "",
+    "msg_name": "RemoteStopTransaction",
+    "msg_content": {},
+  }
+  ocpp_request_to_cp(cpnumber, ocpp_req)
+
+def unlock_connector(cpnumber):
+  ocpp_req = {
+    "msg_direction" : 2,
+    "connection_id" : "",
+    "msg_name": "UnlockConnector",
+    "msg_content": {},
+  }
+  ocpp_request_to_cp(cpnumber, ocpp_req)
+
+def get_conf(cpnumber):
+  ocpp_req = {
+    "msg_direction" : 2,
+    "connection_id" : "",
+    "msg_name": "GetConfiguration",
+    "msg_content": {},
+  }
+  ocpp_request_to_cp(cpnumber, ocpp_req)
+
+def set_conf(cpnumber):
+  ocpp_req = {
+    "msg_direction" : 2,
+    "connection_id" : "",
+    "msg_name": "ChangeConfiguration",
     "msg_content": {},
   }
   ocpp_request_to_cp(cpnumber, ocpp_req)
@@ -96,7 +160,61 @@ def ocpp_request_to_cp(cpnumber, ocpp_req):
 
   if ocpp_req['msg_name'] == 'Reset':
     ocpp_req['msg_content'] = {
-      'type':'Reset Type',
+      'type':'Soft',
+    }
+    message = [ocpp_req['msg_direction'], ocpp_req['connection_id'], ocpp_req['msg_name'], ocpp_req['msg_content']]
+    send_request(cpnumber, message)
+    connectionid_logging(cpnumber, ocpp_req['connection_id'], ocpp_req['msg_name'])
+
+  elif ocpp_req['msg_name'] == 'UpdateFirmware':
+    ocpp_req['msg_content'] = {
+      'location':'http://127.0.0.1:8000/SW_FileDownload/skb_firmware_v1.1.6.bin',
+      'retrieveDate': datetime.now().strftime('%Y-%m-%dT%H:%M:%S') + "Z",
+      'retries': 1,
+      'retryInterval': 1
+    }
+    message = [ocpp_req['msg_direction'], ocpp_req['connection_id'], ocpp_req['msg_name'], ocpp_req['msg_content']]
+    send_request(cpnumber, message)
+    connectionid_logging(cpnumber, ocpp_req['connection_id'], ocpp_req['msg_name'])
+  elif ocpp_req['msg_name'] == 'ClearCache':
+    ocpp_req['msg_content'] = {}
+    message = [ocpp_req['msg_direction'], ocpp_req['connection_id'], ocpp_req['msg_name'], ocpp_req['msg_content']]
+    send_request(cpnumber, message)
+    connectionid_logging(cpnumber, ocpp_req['connection_id'], ocpp_req['msg_name'])
+  elif ocpp_req['msg_name'] == 'RemoteStartTransaction':
+    ocpp_req['msg_content'] = {
+      'idTag':'0000000000150049'
+    }
+    message = [ocpp_req['msg_direction'], ocpp_req['connection_id'], ocpp_req['msg_name'], ocpp_req['msg_content']]
+    send_request(cpnumber, message)
+    connectionid_logging(cpnumber, ocpp_req['connection_id'], ocpp_req['msg_name'])
+  elif ocpp_req['msg_name'] == 'RemoteStopTransaction':
+    ocpp_req['msg_content'] = {
+      'transactionId': 1
+    }
+    message = [ocpp_req['msg_direction'], ocpp_req['connection_id'], ocpp_req['msg_name'], ocpp_req['msg_content']]
+    send_request(cpnumber, message)
+    connectionid_logging(cpnumber, ocpp_req['connection_id'], ocpp_req['msg_name'])
+  elif ocpp_req['msg_name'] == 'UnlockConnector':
+    ocpp_req['msg_content'] = {
+      'connectorId': 1
+    }
+    message = [ocpp_req['msg_direction'], ocpp_req['connection_id'], ocpp_req['msg_name'], ocpp_req['msg_content']]
+    send_request(cpnumber, message)
+    connectionid_logging(cpnumber, ocpp_req['connection_id'], ocpp_req['msg_name'])
+  elif ocpp_req['msg_name'] == 'GetConfiguration':
+    ocpp_req['msg_content'] = {
+      'key': ['MeterValueSampleInterval', 'ClockAlignedDataInterval'],
+    }
+    message = [ocpp_req['msg_direction'], ocpp_req['connection_id'], ocpp_req['msg_name'], ocpp_req['msg_content']]
+    send_request(cpnumber, message)
+    connectionid_logging(cpnumber, ocpp_req['connection_id'], ocpp_req['msg_name'])
+  elif ocpp_req['msg_name'] == 'ChangeConfiguration':
+    ocpp_req['msg_content'] = {
+      'key': 'MeterValueSampleInterval',
+      'value': 0,
+      # 'key': 'ClockAlignedDataInterval',
+      # 'value': 300
     }
     message = [ocpp_req['msg_direction'], ocpp_req['connection_id'], ocpp_req['msg_name'], ocpp_req['msg_content']]
     send_request(cpnumber, message)

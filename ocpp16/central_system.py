@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 import json
 import uuid
@@ -12,6 +12,7 @@ from cardinfo.models import Cardinfo
 from evcharger.models import Evcharger
 from variables.models import Variables
 from clients.models import Clients
+from charginginfo.models import Charginginfo
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger('ocpp')
@@ -20,6 +21,7 @@ global Job_List
 
 def ocpp_request(ocpp_req):
     unique_id = None  
+    cpnumber = ocpp_req['cpnumber']
 
     if ocpp_req['msg_name'] == 'Authorize':
         logging.info('========== Got an Authorize Req ==========')
@@ -29,7 +31,12 @@ def ocpp_request(ocpp_req):
         if queryset.count() == 0:
           status = "Invalid"
         else:
-          status = "Accepted"
+          if queryset[0]['cardstatus'] == '배포됨':
+            status = "Accepted"
+            Clients.objects.filter(cpnumber=cpnumber).update(authorized_tag=id_tag)
+          else:
+            status = queryset[0]['cardstatus']
+            print('cardinfo: %s' % queryset[0]['cardstatus'])
 
         ocpp_conf = [3, ocpp_req['connection_id'],
           {
@@ -56,7 +63,7 @@ def ocpp_request(ocpp_req):
 
         ocpp_conf = [3, ocpp_req['connection_id'],
           {
-            "currentTime":"2022-08-06T03:44:37.668365",
+            "currentTime": datetime.now().strftime('%Y-%m-%dT%H:%M:%S') + "Z",
             "interval": interval,
             "status": status
           }]
@@ -64,6 +71,14 @@ def ocpp_request(ocpp_req):
 
     elif ocpp_req['msg_name'] == 'Heartbeat':
         logging.info('========== Got a Heartbeat ==========') 
+
+        cpnumber = ocpp_req['cpnumber']
+        queryset = Evcharger.objects.filter(cpnumber=cpnumber).values()
+        if queryset.count() == 0:
+          status = "Rejected"   # need to implement "Pending"
+        else:
+          status = "Accepted"
+
 
         ocpp_conf = [3, ocpp_req['connection_id'],
           {
@@ -83,6 +98,8 @@ def ocpp_request(ocpp_req):
             Evcharger.objects.filter(cpnumber=cpnumber).update(connector_id_0_status=ocpp_req['msg_content']['status'])
           if ocpp_req['msg_content']['connectorId'] == 1:
             Evcharger.objects.filter(cpnumber=cpnumber).update(connector_id_1_status=ocpp_req['msg_content']['status'])
+            if ocpp_req['msg_content']['status'] == 'Faulted':
+              Evcharger.objects.filter(cpnumber=cpnumber).update(cpstatus=ocpp_req['msg_content']['errorCode'])
           else:
             pass
 
@@ -136,9 +153,22 @@ def ocpp_request(ocpp_req):
     elif ocpp_req['msg_name'] == 'StartTransaction':
         logging.info('========== Got a StartTransaction Req ==========')
 
+        queryset = Cardinfo.objects.filter(cardtag=ocpp_req['msg_content']['idTag']).values()
+        charginginfo = Charginginfo(
+          cpnumber = cpnumber,
+          userid = queryset[0]['userid'],
+          energy = ocpp_req['msg_content']['meterStart'],
+          amount = 0,
+          # start_dttm = datetime.strptime(ocpp_req['msg_content']['timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ') - timedelta(hours=9),
+          # end_dttm = datetime.strptime(ocpp_req['msg_content']['timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ') - timedelta(hours=9),
+          start_dttm = ocpp_req['msg_content']['timestamp'],
+          end_dttm = ocpp_req['msg_content']['timestamp'],
+        )
+        charginginfo.save()
+
         ocpp_conf = [3, ocpp_req['connection_id'],
           {
-            "transactionId" : ocpp_req['connection_id'],
+            "transactionId" : 1,    # transactionId 부여하는 원칙이 뭔지 확인 필요
             "idTagInfo" : {'parentIdTag': ocpp_req['msg_content']['idTag'],
                 'status': 'Accepted' }
           }]
@@ -147,15 +177,19 @@ def ocpp_request(ocpp_req):
     elif ocpp_req['msg_name'] == 'StopTransaction':
         logging.info('========== Got a StopTransaction Req ==========')
 
-        # [2, '1901019473', 'StopTransaction', 
-        # {'idTag': '0000000000150049', 'meterStop': 182, 'reason': 'Local', 'timestamp': '2022-08-06T03:45:45Z', 'transactionId': -1, 
-        #  'transactionData': [
-        #     {'timestamp': '2022-08-06T03:45:45Z', 'sampledValue': [
-        #         {'value': '0.00', 'context': 'Sample.Periodic', 'format': 'Raw', 'measurand': 'Energy.Active.Import.Register', 'unit': 'Wh'}
-        #         ]
-        #     }
-        #  ]
-        # }]
+        queryset = Cardinfo.objects.filter(cardtag=ocpp_req['msg_content']['idTag']).values()
+        userid = queryset[0]['userid']
+        charginginfo = Charginginfo.objects.filter(cpnumber=cpnumber, userid=userid).values().last()
+        print('charginginfo: ', charginginfo)
+        # energy = ocpp_req['msg_content']['transactionData'][0]['sampledValue'][0]['value']  # float 처리하는 방법 구현 필요 
+        energy = ocpp_req['msg_content']['meterStop'] - charginginfo['energy']
+        # end_dttm = datetime.strptime(ocpp_req['msg_content']['timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ') - timedelta(hours=9)
+        end_dttm = ocpp_req['msg_content']['timestamp']
+        # amount = kepcoTariffs() # 한전 요금표에 따라서 계산하는 루틴이 필요
+        amount = (energy * 200) // 1000
+        print('energy: {}, amount: {}, end_dttm: {}'.format(energy, amount, end_dttm))
+
+        Charginginfo.objects.filter(id=charginginfo['id']).update(energy=energy, amount=amount, end_dttm=end_dttm)
 
         ocpp_conf = [3, ocpp_req['connection_id'],
           {
@@ -226,13 +260,23 @@ def ocpp_conf_from_cp(cpnumber, ocpp_conf):
       print("===================================")
 
   elif ocpp_conf['msg_name'] == 'RemoteStartTransaction':
+    if ocpp_conf['msg_content']['status'] == 'Accepted':
       print("===================================")
       print("RemoteStartTransaction is accepted")
       print("===================================")
+    else:
+      print("===================================")
+      print("UpdateFirmware is {}".format(ocpp_conf['msg_content']['status']))
+      print("===================================")
 
   elif ocpp_conf['msg_name'] == 'RemoteStopTransaction':
+    if ocpp_conf['msg_content']['status'] == 'Accepted':
       print("===================================")
       print("RemoteStopTransaction is accepted")
+      print("===================================")
+    else:
+      print("===================================")
+      print("UpdateFirmware is {}".format(ocpp_conf['msg_content']['status']))
       print("===================================")
 
   elif ocpp_conf['msg_name'] == 'TriggerMessage':
@@ -248,6 +292,16 @@ def ocpp_conf_from_cp(cpnumber, ocpp_conf):
   elif ocpp_conf['msg_name'] == 'UpdateFirmware':
       print("===================================")
       print("UpdateFirmware is accepted")
+      print("===================================")
+
+  elif ocpp_conf['msg_name'] == 'UnlockConnector':
+    if ocpp_conf['msg_content']['status'] == 'Accepted':
+      print("===================================")
+      print("UpdateFirmware is accepted")
+      print("===================================")
+    else:
+      print("===================================")
+      print("UpdateFirmware is {}".format(ocpp_conf['msg_content']['status']))
       print("===================================")
 
   else:
