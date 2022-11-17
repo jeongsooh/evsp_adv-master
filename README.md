@@ -95,3 +95,101 @@ INFO:daphne.server:Listening on TCP address 127.0.0.1:8000
 * Client_gateway: CSMS -> CP datatransfer 처리를 위하여 임시로 작성한 코드
 ### 간단한 구성도
 ![EVSP](https://user-images.githubusercontent.com/29830424/185800244-dfbc0d5d-4c72-4cb0-83b4-fe8070197707.JPG)
+
+
+### Github로 부터 NCLOUD로 publishing 하는 방법
+
+1. github로 부터 url 복사 (https://github.com/jeongsooh/evsp_adv-master.git)
+2. NCLOUD에 code 복사
+```
+(venv) jeongsooh@jssvr:~$
+(venv) jeongsooh@jssvr:~$ cd ~/projects/evsp
+(venv) jeongsooh@jssvr:~/projects/evsp$ ls
+evsp  evsp_221117  venv
+(venv) jeongsooh@jssvr:~/projects/evsp$ git clone https://github.com/jeongsooh/evsp_adv-master.git
+Cloning into 'evsp_adv-master'...
+remote: Enumerating objects: 608, done.
+remote: Counting objects: 100% (608/608), done.
+remote: Compressing objects: 100% (351/351), done.
+remote: Total 608 (delta 395), reused 457 (delta 253), pack-reused 0
+Receiving objects: 100% (608/608), 1.79 MiB | 18.55 MiB/s, done.
+Resolving deltas: 100% (395/395), done.
+(venv) jeongsooh@jssvr:~/projects/evsp$
+```
+3. 현재 실행중인 code를 backup 하고 새로 복사한 code를 실행시킬 수 있도록 directory 단위 이름 변경 (이를 위해서 현재 실행 중인 서비스 중지할 것)
+```
+(venv) jeongsooh@jssvr:~/projects/evsp$
+(venv) jeongsooh@jssvr:~/projects/evsp$ sudo systemctl stop evsp
+(venv) jeongsooh@jssvr:~/projects/evsp$ sudo systemctl status evsp
+● evsp.service - EVSP Service
+   Loaded: loaded (/etc/systemd/system/evsp.service; enabled; vendor preset: enabled)
+   Active: inactive (dead) since Thu 2022-11-17 18:18:28 KST; 9s ago
+  Process: 2385 ExecStart=/home/jeongsooh/start.sh (code=killed, signal=TERM)
+ Main PID: 2385 (code=killed, signal=TERM)
+
+Nov 17 18:09:19 jssvr start.sh[2385]: HTTP GET /charginginfo/ 200 [0.01, 59.12.54.93:13803]
+Nov 17 18:09:19 jssvr start.sh[2385]: INFO:django.channels.server:HTTP GET /charginginfo/ 200 [0.01, 59.12.54.93:13803]
+Nov 17 18:09:20 jssvr start.sh[2385]: HTTP GET /cardinfo/ 200 [0.01, 59.12.54.93:13803]
+Nov 17 18:09:20 jssvr start.sh[2385]: INFO:django.channels.server:HTTP GET /cardinfo/ 200 [0.01, 59.12.54.93:13803]
+Nov 17 18:09:22 jssvr start.sh[2385]: HTTP GET /evcharger/ 200 [0.01, 59.12.54.93:13803]
+Nov 17 18:09:22 jssvr start.sh[2385]: INFO:django.channels.server:HTTP GET /evcharger/ 200 [0.01, 59.12.54.93:13803]
+Nov 17 18:09:31 jssvr start.sh[2385]: HTTP GET /ocpp16/ 200 [0.01, 59.12.54.93:13803]
+Nov 17 18:09:31 jssvr start.sh[2385]: INFO:django.channels.server:HTTP GET /ocpp16/ 200 [0.01, 59.12.54.93:13803]
+Nov 17 18:18:27 jssvr systemd[1]: Stopping EVSP Service...
+Nov 17 18:18:28 jssvr systemd[1]: Stopped EVSP Service.
+(venv) jeongsooh@jssvr:~/projects/evsp$
+(venv) jeongsooh@jssvr:~/projects/evsp$ ls
+evsp  evsp_221117  evsp_adv-master  venv
+(venv) jeongsooh@jssvr:~/projects/evsp$ mv evsp evsp_221118
+(venv) jeongsooh@jssvr:~/projects/evsp$ mv evsp_adv-master evsp
+(venv) jeongsooh@jssvr:~/projects/evsp$
+(venv) jeongsooh@jssvr:~/projects/evsp$ ls
+evsp  evsp_221117  evsp_221118  venv
+(venv) jeongsooh@jssvr:~/projects/evsp$
+
+```
+4. Windows와 Ubuntu의 설정 간 차이가 있는 부분을 조정한 후 다시 서비스 실행. settings.py 화일의 내용을 아래와 같이 변경
+```
+INSTALLED_APPS = [
+    # 'daphne',
+
+    'channels',
+]
+
+TIME_ZONE = 'UTC'
+# TIME_ZONE = 'Asia/Seoul'
+```
+```
+INSTALLED_APPS = [
+    'daphne',
+
+    # 'channels',
+]
+
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
+```
+```
+(venv) jeongsooh@jssvr:~/projects/evsp$
+(venv) jeongsooh@jssvr:~/projects/evsp$
+(venv) jeongsooh@jssvr:~/projects/evsp$ sudo systemctl start evsp
+(venv) jeongsooh@jssvr:~/projects/evsp$ sudo systemctl status evsp
+● evsp.service - EVSP Service
+   Loaded: loaded (/etc/systemd/system/evsp.service; enabled; vendor preset: enabled)
+   Active: active (running) since Thu 2022-11-17 18:26:06 KST; 7s ago
+ Main PID: 2592 (start.sh)
+    Tasks: 4 (limit: 2301)
+   CGroup: /system.slice/evsp.service
+           ├─2592 /bin/bash /home/jeongsooh/start.sh
+           ├─2601 python manage.py runserver 0.0.0.0:8000
+           └─2611 /home/jeongsooh/projects/evsp/venv/bin/python manage.py runserver 0.0.0.0:8000
+
+Nov 17 18:26:06 jssvr systemd[1]: Started EVSP Service.
+Nov 17 18:26:07 jssvr start.sh[2592]: Watching for file changes with StatReloader
+Nov 17 18:26:07 jssvr start.sh[2592]: INFO:daphne.server:HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Nov 17 18:26:07 jssvr start.sh[2592]: INFO:daphne.server:Configuring endpoint tcp:port=8000:interface=0.0.0.0
+Nov 17 18:26:07 jssvr start.sh[2592]: INFO:daphne.server:Listening on TCP address 0.0.0.0:8000
+(venv) jeongsooh@jssvr:~/projects/evsp$
+(venv) jeongsooh@jssvr:~/projects/evsp$
+
+```
