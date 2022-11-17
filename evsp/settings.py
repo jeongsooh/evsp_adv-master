@@ -31,6 +31,8 @@ ALLOWED_HOSTS = ['127.0.0.1', '192.168.0.215', '192.168.0.40', '59.12.54.93']
 # Application definition
 
 INSTALLED_APPS = [
+    # 'daphne',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -124,8 +126,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-# TIME_ZONE = 'UTC'
-TIME_ZONE = 'Asia/Seoul'
+TIME_ZONE = 'UTC'
+# TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
