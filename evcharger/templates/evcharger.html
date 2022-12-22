@@ -35,14 +35,12 @@
       <option value="5">충전기이름</option>
     </select>
   </div>
-  <!-- <div class="col-md-2">
-    <select class="form-select form-select-sm" aria-label="Default select example">
-      <option selected>회원이름</option>
-      <option value="1">회원이름</option>
-      <option value="2">휴대폰번호</option>
-      <option value="3">회원번호</option>
-    </select>
-  </div> -->
+  <div class="col-md-2">
+    <form method="GET">
+      {{ form.as_p }}
+      <input type="submit" value="submit" class="btn btn-primary" />
+    </form>
+  </div>
   <div class="col-md-2">
     <form>
       <div class="input-group input-group-sm">

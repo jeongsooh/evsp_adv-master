@@ -51,6 +51,7 @@ INSTALLED_APPS += [
     'msglog',
     'variables',
     'clients',
+    'budget',
 ]
 
 ASGI_APPLICATION = 'evsp.asgi.application'
@@ -126,8 +127,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
-# TIME_ZONE = 'Asia/Seoul'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import FormView, CreateView, DeleteView, UpdateView
 from django.contrib.auth.hashers import make_password
+from django.db.models import Q
 from evuser.models import Evuser
 from .forms import RegisterForm, LoginForm
 
@@ -22,24 +23,10 @@ def test(request):
   return render(request, 'test.html')
 
 
-# class RegisterView(FormView):
-#   template_name = 'register.html'
-#   form_class = RegisterForm
-#   success_url = '/'
-#   def form_valid(self, form):
-#     evuser = Evuser(
-#       userid=form.data.get('userid'),
-#       password=make_password(form.data.get('password')),
-#       level='user'
-#     )
-#     evuser.save()
-
-#     return super().form_valid(form)
-
 class EvuserCreateView(CreateView):
   model = Evuser
   template_name = 'evuser_register.html'
-  fields = ['userid', 'password', 'name', 'email', 'phone', 'address']
+  fields = ['userid', 'password', 'name', 'email', 'phone', 'address', 'category', 'status', 'level']
   success_url = '/evuser'
 
 class EvuserDeleteView(DeleteView):
@@ -58,7 +45,18 @@ class EvuserList(ListView):
   template_name='evuser.html'
   context_object_name = 'evuserList'
   paginate_by = 2
-  queryset = Evuser.objects.all()
+  # queryset = Evuser.objects.all()
+
+  def get_queryset(self):
+    queryset = Evuser.objects.all()
+    query = self.request.GET.get("q", None)
+    if query is not None:
+      queryset = queryset.filter(
+        Q(userid__icontains=query) |
+        Q(name__icontains=query) |
+        Q(phone__icontains=query)
+      )
+    return queryset
 
   def get_context_data(self, **kwargs):
     context = super(EvuserList, self).get_context_data(**kwargs)
@@ -95,14 +93,5 @@ def logout(request):
 
   return redirect('/')
 
-def search(request):
-    country = request.GET.get("country")
-    if country:
-        form = forms.SearchForm(request.GET)
-        if form.is_valid():
-            print(form.cleaned_data)
-    else:
-        form = forms.SearchForm()
-    context = {"form": form}
-    return render(request, "rooms/search.html", context)
+
 

@@ -22,3 +22,5 @@ class EvchargerResetForm(forms.Form):
 
       self.cpnumber = evcharger.id
 
+class EvchargerFilterForm(forms.Form):
+  name = forms.CharField()

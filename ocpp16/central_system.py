@@ -13,6 +13,7 @@ from evcharger.models import Evcharger
 from variables.models import Variables
 from clients.models import Clients
 from charginginfo.models import Charginginfo
+from charginginfo.kepco_tariff import calculate_price
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger('ocpp')
@@ -159,8 +160,6 @@ def ocpp_request(ocpp_req):
           userid = queryset[0]['userid'],
           energy = ocpp_req['msg_content']['meterStart'],
           amount = 0,
-          # start_dttm = datetime.strptime(ocpp_req['msg_content']['timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ') - timedelta(hours=9),
-          # end_dttm = datetime.strptime(ocpp_req['msg_content']['timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ') - timedelta(hours=9),
           start_dttm = ocpp_req['msg_content']['timestamp'],
           end_dttm = ocpp_req['msg_content']['timestamp'],
         )
@@ -185,8 +184,13 @@ def ocpp_request(ocpp_req):
         energy = ocpp_req['msg_content']['meterStop'] - charginginfo['energy']
         # end_dttm = datetime.strptime(ocpp_req['msg_content']['timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ') - timedelta(hours=9)
         end_dttm = ocpp_req['msg_content']['timestamp']
+        start_dttm = charginginfo['start_dttm']
+        print('start_dttm: ', type(start_dttm), start_dttm)
+        print('end_dttm: ', type(end_dttm), end_dttm)
         # amount = kepcoTariffs() # 한전 요금표에 따라서 계산하는 루틴이 필요
-        amount = (energy * 200) // 1000
+        energy_kw = energy / 1000
+        usage_amount, base_amount = calculate_price(start_dttm, end_dttm, energy_kw)
+        amount = usage_amount + base_amount
         print('energy: {}, amount: {}, end_dttm: {}'.format(energy, amount, end_dttm))
 
         Charginginfo.objects.filter(id=charginginfo['id']).update(energy=energy, amount=amount, end_dttm=end_dttm)

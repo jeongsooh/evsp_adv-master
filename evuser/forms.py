@@ -63,3 +63,8 @@ class LoginForm(forms.Form):
         self.add_error('password', '비밀번호가 틀렸습니다.')
       else:
         self.user_id = evuser.id
+
+class EvuserFilterForm(forms.Form):
+  name = forms.CharField()
+
+

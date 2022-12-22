@@ -9,7 +9,7 @@
   <h4>회원정보 삭제</h4>
   <div class="row mt-5">
     <div class="col-12">
-      다음 회원을 삭제합니다: {{ evuser.username }}
+      다음 회원을 삭제합니다: {{ evuser.userid }}
       <form method="post">
         {% csrf_token %}
         <button class="btn btn-danger btn-sm mt-3">확인</button>

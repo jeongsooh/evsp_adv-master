@@ -17,8 +17,8 @@ from django.contrib import admin
 from django.urls import path, include
 
 from evuser.views import (
-    index, search, EvuserUpdateView,
-    EvuserList, logout, EvuserDetail, EvuserCreateView, EvuserDeleteView, test
+    index, EvuserUpdateView,
+    EvuserList, logout, EvuserDetail, EvuserCreateView, EvuserDeleteView, test,
     )
 from charginginfo.views import (
     CharginginfoList, CharginginfoCreateView, CharginginfoDetail,
@@ -49,7 +49,6 @@ urlpatterns = [
     path('evuser/<int:pk>/delete/', EvuserDeleteView.as_view()),
     path('evuser/<int:pk>/', EvuserDetail.as_view()),
     path('evuser/register/', EvuserCreateView.as_view()),
-    path('evuser/search/', search),
     path('charginginfo/', CharginginfoList.as_view()),
     path('charginginfo/<int:pk>/', CharginginfoDetail.as_view()),
     path('charginginfo/register/', CharginginfoCreateView.as_view()),
