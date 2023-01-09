@@ -24,24 +24,24 @@
 
 {% block contents %}
 <div class="row mt-3 mx-3">
-  <div class="col-md-8 fw-bold"><h4>충전기정보</h4></div>
-  <div class="col-md-2">
+  <div class="col-md-9 fw-bold"><h4>충전기정보</h4></div>
+  <!-- <div class="col-md-4">
     <select class="form-select form-select-sm" aria-label="Default select example">
       <option selected>검색유형</option>
-      <option value="1">회원번호</option>
-      <option value="2">회원이름</option>
-      <option value="3">휴대폰번호</option>
-      <option value="4">충전기번호</option>
-      <option value="5">충전기이름</option>
+      <option value="1">충전기번호</option>
+      <option value="2">충전기이름</option>
+      <option value="3">파트너아이디</option>
+      <option value="4">충전기상태</option>
+      <option value="5">등록일시</option>
     </select>
-  </div>
-  <div class="col-md-2">
-    <form method="GET">
-      {{ form.as_p }}
-      <input type="submit" value="submit" class="btn btn-primary" />
+  </div> -->
+  <div class="col-md-3">
+    <form method="GET"  action="/evcharger/">
+      {{ evchargerList.form.as_p }}
+      <input type="submit" value="submit" class="btn btn-primary btn-sm" />
     </form>
   </div>
-  <div class="col-md-2">
+  <!-- <div class="col-md-2">
     <form>
       <div class="input-group input-group-sm">
         <input type="text" class="form-control" placeholder="" aria-label="Recipient's userid" aria-describedby="button-addon2">
@@ -50,10 +50,10 @@
         </button>
       </div>
     </form>
-  </div>
+  </div> -->
 </div>
 <div class="row mt-3 mx-3">
-  <div class="col-md-6 fw-bold"><h5>충전기정보</h5></div>
+  <div class="col-md-9 fw-bold"><h5>충전기정보</h5></div>
   <div class="col-md-1 d-grid justify-content-md-end">
     <button class="btn btn-primary btn-sm" 
       onclick="location.href='/evcharger/register/'">충전기추가
@@ -64,7 +64,7 @@
       onclick="location.href='/evcharger/fwupdate/'">펌웨어업데이트
     </button>
   </div>
-  <div class="col-md-3">
+  <!-- <div class="col-md-3">
     <div class="row justify-content-end">
       <label class="col form-select-sm text-end">정렬기준</label>
       <select class="col form-select form-select-sm" aria-label="Default select example">
@@ -74,7 +74,7 @@
         <option value="3">회원번호</option>
       </select>
     </div>
-  </div>
+  </div> -->
 </div>
 <div class="row mt-2 mx-2">
   <div class="col-12">

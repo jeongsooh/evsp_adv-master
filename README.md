@@ -193,3 +193,82 @@ Nov 17 18:26:07 jssvr start.sh[2592]: INFO:daphne.server:Listening on TCP addres
 (venv) jeongsooh@jssvr:~/projects/evsp$
 
 ```
+
+### 추가된 내용 (2023년 1월 10일 업데이트)
+1. 회원관리에 검색 관련 내용 추가
+- evuser.html에서 input에 입력된 내용을 name = 'q'로 받아서 views.py로 전달하고 이를 반영한 queryset 생성
+- 검색된 queryset을 evuser.html을 통해서 list로 보여주지만 전후로 이동하면 검색된 내용이 해제되면서 검색 이전의 리스트로 복귀되는 문제
+- evuser.html 변경된 내용
+```
+    <form method="get" action="/evuser">
+      <div class="input-group input-group-sm">
+        <input type="text" class="form-control" name="q" placeholder="" aria-label="Recipient's userid" aria-describedby="button-addon2">
+        <button class="btn btn-primary" type="submit" id="button-addon2">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+    </form>
+```
+- views.py의 EvuserList class에 추가된 내용
+```
+def get_queryset(self):
+  queryset = Evuser.objects.all()
+  query = self.request.GET.get("q", None)
+  if query is not None:
+    queryset = queryset.filter(
+      Q(userid__icontains=query) |
+      Q(name__icontains=query) |
+      Q(phone__icontains=query)
+    )
+  return queryset
+```  
+
+2. 카드관리에서는 상기 회원관리에서 나타난 문제점을 해결하기 위하여 pagination에 아래와 같이 templatetags 기법을 적용
+- cardinfo.html과 views.py의 CardinfoList class는 상기 회원관리와 같이 변경
+- templatetags/__init__.py 화일을 만들고 내용을 공백으로 둔다.
+- templatetags/cardinfo_extras.py 화일을 만들고 내용을 아래와 같이 작성하여 my_url 함수를 만든다.
+```
+from django import template
+
+register = template.Library()
+
+@register.simple_tag
+def my_url(value, field_name, urlencode=None):
+  url = '?{}={}'.format(field_name, value)
+
+  if urlencode is not None:
+    querystring = urlencode.split('&')
+    filtered_querystring = filter(lambda p: p.split('=')[0]!=field_name, querystring)
+    encoded_querystring = '&'.join(filtered_querystring)
+    url = '{}&{}'.format(url, encoded_querystring)
+
+  return url
+```
+- 이와 같이 만들어진 my_url을 이용하여 cardinfo.html 화일의 pagination 관련 내용을 아래와 같이 변경한다. (Comment 처리된 원래 내용 참조)
+```
+    <div class="pagination justify-content-center mt-5">
+      <ul class="step-links">
+        {% if page_obj.has_previous %}
+        <a class="btn btn-sm btn-outline-primary" href="{% my_url 1 'page' request.GET.urlencode %}">처음으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="{% my_url page_obj.previous_page_number 'page' request.GET.urlencode %}">이전으로</a>
+        <!-- <a class="btn btn-sm btn-outline-primary" href="?page=1">처음으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.previous_page_number }}">이전으로</a> -->
+        {% else %}
+        <a class="btn btn-sm btn-outline-primary disabled" href="#">처음으로</a>
+        <a class="btn btn-sm btn-outline-primary disabled" href="#">이전으로</a>
+        {% endif %}
+      <span class="current">
+        {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+      </span>
+        {% if page_obj.has_next %}
+        <a class="btn btn-sm btn-outline-primary" href="{% my_url page_obj.next_page_number 'page' request.GET.urlencode %}">다음으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="{% my_url page_obj.paginator.num_pages 'page' request.GET.urlencode %}">마지막으로</a>
+        <!-- <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.next_page_number }}">다음으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.paginator.num_pages }}">마지막으로</a> -->
+        {% else %}
+        <a class="btn btn-sm btn-outline-primary disabled" href="#">다음으로</a>
+        <a class="btn btn-sm btn-outline-primary disabled" href="#">마지막으로</a>
+        {% endif %}
+      </ul>
+    </div>
+```

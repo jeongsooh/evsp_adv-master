@@ -23,4 +23,8 @@ class EvchargerResetForm(forms.Form):
       self.cpnumber = evcharger.id
 
 class EvchargerFilterForm(forms.Form):
-  name = forms.CharField()
+  cpname = forms.CharField()
+  cpnumber = forms.CharField()
+  partnet_id = forms.CharField()
+  cpstatus = forms.CharField()
+  register_dttm = forms.DateTimeField()

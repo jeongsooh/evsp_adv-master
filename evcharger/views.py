@@ -2,7 +2,8 @@ from django.shortcuts import render
 from django.views.generic import ListView, DetailView, UpdateView, CreateView, DeleteView
 from django.views.generic.edit import FormView
 from .models import Evcharger
-from .forms import EvchargerResetForm
+from .forms import EvchargerResetForm, EvchargerFilterForm
+from .filters import EvchargerFilter
 
 from ocpp16.client_gateway import reset_evcharger, update_evcharger
 
@@ -15,10 +16,16 @@ class EvchargerList(ListView):
   paginate_by = 2
   queryset = Evcharger.objects.all()
 
+  def get_queryset(self):
+    queryset = super().get_queryset()
+    myFilter = EvchargerFilter(self.request.GET, queryset=queryset)
+    return myFilter.qs
+
   def get_context_data(self, **kwargs):
     context = super().get_context_data(**kwargs)
     user_id = self.request.session['user']
     context['loginuser'] = user_id
+
     return context
 
 class EvchargerDetail(DetailView):

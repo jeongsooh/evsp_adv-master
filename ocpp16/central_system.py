@@ -160,8 +160,8 @@ def ocpp_request(ocpp_req):
           userid = queryset[0]['userid'],
           energy = ocpp_req['msg_content']['meterStart'],
           amount = 0,
-          start_dttm = ocpp_req['msg_content']['timestamp'],
-          end_dttm = ocpp_req['msg_content']['timestamp'],
+          start_dttm = datetime.strptime(ocpp_req['msg_content']['timestamp'], '%Y-%m-%dT%H:%M:%SZ'),
+          end_dttm = datetime.strptime(ocpp_req['msg_content']['timestamp'], '%Y-%m-%dT%H:%M:%SZ'),
         )
         charginginfo.save()
 
@@ -180,20 +180,21 @@ def ocpp_request(ocpp_req):
         userid = queryset[0]['userid']
         charginginfo = Charginginfo.objects.filter(cpnumber=cpnumber, userid=userid).values().last()
         print('charginginfo: ', charginginfo)
-        # energy = ocpp_req['msg_content']['transactionData'][0]['sampledValue'][0]['value']  # float 처리하는 방법 구현 필요 
         energy = ocpp_req['msg_content']['meterStop'] - charginginfo['energy']
-        # end_dttm = datetime.strptime(ocpp_req['msg_content']['timestamp'], '%Y-%m-%dT%H:%M:%S.%fZ') - timedelta(hours=9)
         end_dttm = ocpp_req['msg_content']['timestamp']
-        start_dttm = charginginfo['start_dttm']
+        start_time = charginginfo['start_dttm']
+        start_dttm = datetime.strftime('%Y-%m-%dT%H:%M:%SZ')
         print('start_dttm: ', type(start_dttm), start_dttm)
         print('end_dttm: ', type(end_dttm), end_dttm)
-        # amount = kepcoTariffs() # 한전 요금표에 따라서 계산하는 루틴이 필요
+        # amount = kepcoTariffs() # 한전 요금표에 따라서 계산하는 루틴
         energy_kw = energy / 1000
         usage_amount, base_amount = calculate_price(start_dttm, end_dttm, energy_kw)
         amount = usage_amount + base_amount
         print('energy: {}, amount: {}, end_dttm: {}'.format(energy, amount, end_dttm))
 
-        Charginginfo.objects.filter(id=charginginfo['id']).update(energy=energy, amount=amount, end_dttm=end_dttm)
+        end_time = datetime.strptime(end_dttm, '%Y-%m-%dT%H:%M:%SZ')
+
+        Charginginfo.objects.filter(id=charginginfo['id']).update(energy=energy, amount=amount, end_dttm=end_time)
 
         ocpp_conf = [3, ocpp_req['connection_id'],
           {

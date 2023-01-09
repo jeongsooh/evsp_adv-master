@@ -6,67 +6,80 @@
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 <script>
   $( function() {
-    $( "#date-picker1" ).datepicker();
+    $( "#id_start_dttm__gt" ).datepicker();
   } );
   $( function() {
-    $( "#date-picker2" ).datepicker();
+    $( "#id_end_dttm__lt" ).datepicker();
   } );
 </script>
 {% endblock %}
 
 {% block contents %}
 <div class="row mt-3 mx-3">
-  <div class="col-md-6 fw-bold"><h4>충전정보</h4></div>
+  <div class="col-md-8 fw-bold"><h4>충전정보</h4></div>
   <div class="col-md-1">
-    <form>
-      <div class="input-group input-group-sm" id="datepicket1">
-        <input type="text" id="date-picker1" class="form-control" placeholder="FROM" />
-      </div>
-    </form>
+    <div class="form-group mb-3 col-auto" id="datepicket1">
+      <input type="{{ form.start_dttm__gt.field.widget.input_type }}" id="{{ form.start_dttm__gt.id_for_label }}" 
+        name="{{ form.start_dttm__gt.name }}" class="form-control form-control-sm" placeholder="시작일" />
+    </div>
   </div>
   <div class="col-md-1">
-    <form>
-      <div class="input-group input-group-sm" id="datepicket2">
-        <input type="text" id="date-picker2" class="form-control" placeholder="TO" />
-      </div>
-    </form>
+    <div class="form-group mb-3 col-auto" id="datepicket2">
+      <input type="{{ form.end_dttm__lt.field.widget.input_type }}" id="{{ form.end_dttm__lt.id_for_label }}" 
+        name="{{ form.end_dttm__lt.name }}" class="form-control form-control-sm" placeholder="마지막날" />
+    </div>
   </div>
-  <div class="col-md-2">
-    <select class="form-select form-select-sm" aria-label="Default select example">
-      <option selected>검색유형</option>
-      <option value="1">회원이름</option>
-      <option value="2">전화번호</option>
-      <option value="3">충전기번호</option>
-    </select>
+  <div class="col-md-1">
+    <div class="form-group mb-3 col-auto">
+      <form method="GET" action="">
+        <input type="{{ form.userid.field.widget.input_type }}" id="{{ form.userid.id_for_label }}" 
+          name="{{ form.userid.name }}" class="form-control form-control-sm" placeholder="{{ form.userid.label }}" />
+      </form>
+    </div>
   </div>
-  <div class="col-md-2">
-    <form>
-      <div class="input-group input-group-sm">
-        <input type="text" class="form-control" placeholder="" aria-label="Recipient's username" aria-describedby="button-addon2">
-        <button class="btn btn-primary" type="button" id="button-addon2">
+  <div class="col-md-1">
+    <div class="form-group mb-3 col-auto">
+      <form method="GET" action="">
+        <input type="{{ form.cpnumber.field.widget.input_type }}" id="{{ form.cpnumber.id_for_label }}" 
+          name="{{ form.cpnumber.name }}" class="form-control form-control-sm" placeholder="{{ form.cpnumber.label }}" />
+        <button class="btn btn-primary" type="submit" id="button-addon2">
           <i class="bi bi-search"></i>
         </button>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
 </div>
+<div class="row mt-3 mx-3 justify-content-end">
+  <form method="GET" action="/charginginfo">
+    {{ form.as_p }}
+    <input type="submit" value="Submit" class="btn btn-primary" />
+  </form>
+  <form method="GET" action="/charginginfo">
+    {{ form.as_table }}
+    <input type="submit" value="Submit" class="btn btn-primary" />
+  </form>
+  <form method="GET" action="/charginginfo">
+    {{ form.as_ul }}
+    <input type="submit" value="Submit" class="btn btn-primary" />
+  </form>
+  <form method="GET" action="/charginginfo">
+    {% for field in form %}
+    <div class="field-row">
+      {{ field.label_tag }} {{ field }}
+      {% if field.help_text %}
+        <p class="help">{{ field.help_text }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+    <input type="submit" value="Submit" class="btn btn-primary" />
+  </form>
+</div>
 <div class="row mt-3 mx-3">
-  <div class="col-md-6 fw-bold"><h5>충전정보</h5></div>
+  <div class="col-md-9 fw-bold"><h5>충전정보</h5></div>
   <div class="col-md-3 d-grid justify-content-md-end">
     <button class="btn btn-primary btn-sm" 
       onclick="location.href='/charginginfo/register/'">충전정보추가
     </button>
-  </div>
-  <div class="col-md-3">
-    <div class="row justify-content-end">
-      <label class="col form-select-sm text-end">정렬기준</label>
-      <select class="col form-select form-select-sm" aria-label="Default select example">
-        <option selected>회원이름</option>
-        <option value="1">회원이름</option>
-        <option value="2">휴대폰번호</option>
-        <option value="3">회원번호</option>
-      </select>
-    </div>
   </div>
 </div>
 <div class="row mt-2 mx-2">

@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.views.generic import ListView, CreateView, DeleteView, DetailView, UpdateView
 from django.views.generic.edit import FormView
 
+from django.db.models import Q
+
 import json
 import uuid
 
@@ -21,6 +23,16 @@ class CardinfoList(ListView):
   paginate_by = 2
   queryset = Cardinfo.objects.all()
 
+  def get_queryset(self):
+    queryset = Cardinfo.objects.all()
+    query = self.request.GET.get("q", None)
+    if query is not None:
+      queryset = queryset.filter(
+        Q(userid__icontains=query) |
+        Q(cardname__icontains=query) |
+        Q(cardtag__icontains=query)
+      )
+    return queryset
 
   def get_context_data(self, **kwargs):
     context = super().get_context_data(**kwargs)
