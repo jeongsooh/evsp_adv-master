@@ -17,63 +17,35 @@
 {% block contents %}
 <div class="row mt-3 mx-3">
   <div class="col-md-8 fw-bold"><h4>충전정보</h4></div>
-  <div class="col-md-1">
-    <div class="form-group mb-3 col-auto" id="datepicket1">
-      <input type="{{ form.start_dttm__gt.field.widget.input_type }}" id="{{ form.start_dttm__gt.id_for_label }}" 
-        name="{{ form.start_dttm__gt.name }}" class="form-control form-control-sm" placeholder="시작일" />
-    </div>
-  </div>
-  <div class="col-md-1">
-    <div class="form-group mb-3 col-auto" id="datepicket2">
-      <input type="{{ form.end_dttm__lt.field.widget.input_type }}" id="{{ form.end_dttm__lt.id_for_label }}" 
-        name="{{ form.end_dttm__lt.name }}" class="form-control form-control-sm" placeholder="마지막날" />
-    </div>
-  </div>
-  <div class="col-md-1">
-    <div class="form-group mb-3 col-auto">
-      <form method="GET" action="">
-        <input type="{{ form.userid.field.widget.input_type }}" id="{{ form.userid.id_for_label }}" 
-          name="{{ form.userid.name }}" class="form-control form-control-sm" placeholder="{{ form.userid.label }}" />
-      </form>
-    </div>
-  </div>
-  <div class="col-md-1">
-    <div class="form-group mb-3 col-auto">
-      <form method="GET" action="">
-        <input type="{{ form.cpnumber.field.widget.input_type }}" id="{{ form.cpnumber.id_for_label }}" 
-          name="{{ form.cpnumber.name }}" class="form-control form-control-sm" placeholder="{{ form.cpnumber.label }}" />
-        <button class="btn btn-primary" type="submit" id="button-addon2">
-          <i class="bi bi-search"></i>
-        </button>
-      </form>
-    </div>
+  <div class="col-md-4 bg-light">
+    <form action="" method="get">
+      <div class="row">
+        <div class="form-group mb-3 col-md-2" id="datepicket1">
+          <input type="{{ form.start_dttm__gt.field.widget.input_type }}" id="{{ form.start_dttm__gt.id_for_label }}" 
+            name="{{ form.start_dttm__gt.name }}" class="form-control form-control-sm" placeholder="시작일" />
+        </div>
+        <div class="form-group mb-3 col-md-2" id="datepicket2">
+          <input type="{{ form.end_dttm__lt.field.widget.input_type }}" id="{{ form.end_dttm__lt.id_for_label }}" 
+            name="{{ form.end_dttm__lt.name }}" class="form-control form-control-sm" placeholder="마지막날" />
+        </div>
+        <div class="form-group mb-3 col-md-3">
+          <input type="{{ form.userid.field.widget.input_type }}" id="{{ form.userid.id_for_label }}" 
+            name="{{ form.userid.name }}" class="form-control form-control-sm" placeholder="{{ form.userid.label }}" />
+        </div>
+        <div class="form-group mb-3 col-md-3 d-grid justify-content-md-end">
+          <input type="{{ form.cpnumber.field.widget.input_type }}" id="{{ form.cpnumber.id_for_label }}" 
+            name="{{ form.cpnumber.name }}" class="form-control form-control-sm" placeholder="{{ form.cpnumber.label }}" />
+        </div>
+        <div class="form-group mb-3 col-md-1 d-grid justify-content-md-end">
+          <button class="btn btn-primary" type="submit" id="button-addon2">
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
+      </div>
+    </form>
   </div>
 </div>
-<div class="row mt-3 mx-3 justify-content-end">
-  <form method="GET" action="/charginginfo">
-    {{ form.as_p }}
-    <input type="submit" value="Submit" class="btn btn-primary" />
-  </form>
-  <form method="GET" action="/charginginfo">
-    {{ form.as_table }}
-    <input type="submit" value="Submit" class="btn btn-primary" />
-  </form>
-  <form method="GET" action="/charginginfo">
-    {{ form.as_ul }}
-    <input type="submit" value="Submit" class="btn btn-primary" />
-  </form>
-  <form method="GET" action="/charginginfo">
-    {% for field in form %}
-    <div class="field-row">
-      {{ field.label_tag }} {{ field }}
-      {% if field.help_text %}
-        <p class="help">{{ field.help_text }}</p>
-      {% endif %}
-    </div>
-    {% endfor %}
-    <input type="submit" value="Submit" class="btn btn-primary" />
-  </form>
-</div>
+
 <div class="row mt-3 mx-3">
   <div class="col-md-9 fw-bold"><h5>충전정보</h5></div>
   <div class="col-md-3 d-grid justify-content-md-end">
@@ -84,6 +56,7 @@
 </div>
 <div class="row mt-2 mx-2">
   <div class="col-12">
+    {% load cardinfo_extras %}
     <table class="table table-light">
       <thead class="thead-light">
         <tr>
@@ -113,8 +86,10 @@
     <div class="pagination justify-content-center mt-5">
       <ul class="step-links">
         {% if page_obj.has_previous %}
-        <a class="btn btn-sm btn-outline-primary" href="?page=1">처음으로</a>
-        <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.previous_page_number }}">이전으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="{% my_url 1 'page' request.GET.urlencode %}">처음으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="{% my_url page_obj.previous_page_number 'page' request.GET.urlencode %}">이전으로</a>
+        <!-- <a class="btn btn-sm btn-outline-primary" href="?page=1">처음으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.previous_page_number }}">이전으로</a> -->
         {% else %}
         <a class="btn btn-sm btn-outline-primary disabled" href="#">처음으로</a>
         <a class="btn btn-sm btn-outline-primary disabled" href="#">이전으로</a>
@@ -123,8 +98,10 @@
         {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
       </span>
         {% if page_obj.has_next %}
-        <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.next_page_number }}">다음으로</a>
-        <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.paginator.num_pages }}">마지막으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="{% my_url page_obj.next_page_number 'page' request.GET.urlencode %}">다음으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="{% my_url page_obj.paginator.num_pages 'page' request.GET.urlencode %}">마지막으로</a>
+        <!-- <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.next_page_number }}">다음으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.paginator.num_pages }}">마지막으로</a> -->
         {% else %}
         <a class="btn btn-sm btn-outline-primary disabled" href="#">다음으로</a>
         <a class="btn btn-sm btn-outline-primary disabled" href="#">마지막으로</a>

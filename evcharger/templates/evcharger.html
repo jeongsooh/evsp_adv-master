@@ -24,60 +24,44 @@
 
 {% block contents %}
 <div class="row mt-3 mx-3">
-  <div class="col-md-9 fw-bold"><h4>충전기정보</h4></div>
-  <!-- <div class="col-md-4">
+  <div class="col-md-8 fw-bold"><h4>충전기정보</h4></div>
+  <div class="col-md-2">
     <select class="form-select form-select-sm" aria-label="Default select example">
-      <option selected>검색유형</option>
-      <option value="1">충전기번호</option>
-      <option value="2">충전기이름</option>
-      <option value="3">파트너아이디</option>
+      <option selected>충전기번호</option>
+      <option value="1">충전기이름</option>
+      <option value="2">파트너아이디</option>
+      <option value="3">주소</option>
       <option value="4">충전기상태</option>
       <option value="5">등록일시</option>
     </select>
-  </div> -->
-  <div class="col-md-3">
-    <form method="GET"  action="/evcharger/">
-      {{ evchargerList.form.as_p }}
-      <input type="submit" value="submit" class="btn btn-primary btn-sm" />
-    </form>
   </div>
-  <!-- <div class="col-md-2">
-    <form>
+  <div class="col-md-2">
+    <form method="GET"  action="/evcharger/">
       <div class="input-group input-group-sm">
-        <input type="text" class="form-control" placeholder="" aria-label="Recipient's userid" aria-describedby="button-addon2">
-        <button class="btn btn-primary" type="button" id="button-addon2">
+        <input name="q" type="text" class="form-control" placeholder="" aria-label="Recipient's userid" aria-describedby="button-addon2">
+        <button class="btn btn-primary" type="submit" id="button-addon2">
           <i class="bi bi-search"></i>
         </button>
       </div>
     </form>
-  </div> -->
+  </div>
 </div>
 <div class="row mt-3 mx-3">
-  <div class="col-md-9 fw-bold"><h5>충전기정보</h5></div>
+  <div class="col-md-10 fw-bold"><h5>충전기정보</h5></div>
   <div class="col-md-1 d-grid justify-content-md-end">
     <button class="btn btn-primary btn-sm" 
       onclick="location.href='/evcharger/register/'">충전기추가
     </button>
   </div>
-  <div class="col-md-2 d-grid justify-content-md-end">
+  <div class="col-md-1 d-grid justify-content-md-end">
     <button class="btn btn-primary btn-sm" 
       onclick="location.href='/evcharger/fwupdate/'">펌웨어업데이트
     </button>
   </div>
-  <!-- <div class="col-md-3">
-    <div class="row justify-content-end">
-      <label class="col form-select-sm text-end">정렬기준</label>
-      <select class="col form-select form-select-sm" aria-label="Default select example">
-        <option selected>회원이름</option>
-        <option value="1">회원이름</option>
-        <option value="2">휴대폰번호</option>
-        <option value="3">회원번호</option>
-      </select>
-    </div>
-  </div> -->
 </div>
 <div class="row mt-2 mx-2">
   <div class="col-12">
+    {% load cardinfo_extras %}
     <table class="table table-light">
       <thead class="thead-light">
         <tr>
@@ -116,8 +100,8 @@
     <div class="pagination justify-content-center mt-5">
       <ul class="step-links">
         {% if page_obj.has_previous %}
-        <a class="btn btn-sm btn-outline-primary" href="?page=1">처음으로</a>
-        <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.previous_page_number }}">이전으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="{% my_url 1 'page' request.GET.urlencode %}">처음으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="{% my_url page_obj.previous_page_number 'page' request.GET.urlencode %}">이전으로</a>
         {% else %}
         <a class="btn btn-sm btn-outline-primary disabled" href="#">처음으로</a>
         <a class="btn btn-sm btn-outline-primary disabled" href="#">이전으로</a>
@@ -126,8 +110,8 @@
         {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
       </span>
         {% if page_obj.has_next %}
-        <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.next_page_number }}">다음으로</a>
-        <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.paginator.num_pages }}">마지막으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="{% my_url page_obj.next_page_number 'page' request.GET.urlencode %}">다음으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="{% my_url page_obj.paginator.num_pages 'page' request.GET.urlencode %}">마지막으로</a>
         {% else %}
         <a class="btn btn-sm btn-outline-primary disabled" href="#">다음으로</a>
         <a class="btn btn-sm btn-outline-primary disabled" href="#">마지막으로</a>

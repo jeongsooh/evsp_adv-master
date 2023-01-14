@@ -1,6 +1,9 @@
 from django.shortcuts import render
 from django.views.generic import ListView, DetailView, UpdateView, CreateView, DeleteView
 from django.views.generic.edit import FormView
+
+from django.db.models import Q
+
 from .models import Evcharger
 from .forms import EvchargerResetForm, EvchargerFilterForm
 from .filters import EvchargerFilter
@@ -20,6 +23,20 @@ class EvchargerList(ListView):
     queryset = super().get_queryset()
     myFilter = EvchargerFilter(self.request.GET, queryset=queryset)
     return myFilter.qs
+
+  def get_queryset(self):
+    queryset = Evcharger.objects.all()
+    query = self.request.GET.get("q", None)
+    if query is not None:
+      queryset = queryset.filter(
+        Q(cpstatus__icontains=query) |
+        Q(cpnumber__icontains=query) |
+        Q(cpname__icontains=query) |
+        Q(address__icontains=query) |
+        Q(register_dttm__icontains=query) |
+        Q(partner_id__icontains=query)
+      )
+    return queryset
 
   def get_context_data(self, **kwargs):
     context = super().get_context_data(**kwargs)

@@ -6,10 +6,9 @@
   <div class="col-md-2">
     <select class="form-select form-select-sm" aria-label="Default select example">
       <option selected>회원이름</option>
-      <option value="1">회원이름</option>
-      <option value="2">휴대폰번호</option>
-      <option value="3">회원번호</option>
-      <option value="4">회원상태</option>
+      <option value="1">휴대폰번호</option>
+      <option value="2">회원아이디</option>
+      <option value="3">회원상태</option>
     </select>
   </div>
   <div class="col-md-2">
@@ -33,11 +32,12 @@
 </div>
 <div class="row mt-2 mx-2">
   <div class="col-12">
+    {% load cardinfo_extras %}
     <table class="table table-light">
       <thead class="thead-light">
         <tr>
           <th scope="col">#</th>
-          <th scope="col">사용자명</th>
+          <th scope="col">회원아이디</th>
           <th scope="col">회원이름</th>
           <th scope="col">전화번호</th>
           <th scope="col">주소</th>
@@ -64,8 +64,8 @@
     <div class="pagination justify-content-center mt-5">
       <ul class="step-links">
         {% if page_obj.has_previous %}
-        <a class="btn btn-sm btn-outline-primary" href="?page=1">처음으로</a>
-        <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.previous_page_number }}">이전으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="{% my_url 1 'page' request.GET.urlencode %}">처음으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="{% my_url page_obj.previous_page_number 'page' request.GET.urlencode %}">이전으로</a>
         {% else %}
         <a class="btn btn-sm btn-outline-primary disabled" href="#">처음으로</a>
         <a class="btn btn-sm btn-outline-primary disabled" href="#">이전으로</a>
@@ -74,8 +74,8 @@
         {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
       </span>
         {% if page_obj.has_next %}
-        <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.next_page_number }}">다음으로</a>
-        <a class="btn btn-sm btn-outline-primary" href="?page={{ page_obj.paginator.num_pages }}">마지막으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="{% my_url page_obj.next_page_number 'page' request.GET.urlencode %}">다음으로</a>
+        <a class="btn btn-sm btn-outline-primary" href="{% my_url page_obj.paginator.num_pages 'page' request.GET.urlencode %}">마지막으로</a>
         {% else %}
         <a class="btn btn-sm btn-outline-primary disabled" href="#">다음으로</a>
         <a class="btn btn-sm btn-outline-primary disabled" href="#">마지막으로</a>

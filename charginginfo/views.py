@@ -20,16 +20,15 @@ class CharginginfoList(ListView):
   queryset = Charginginfo.objects.all()
 
   def get_queryset(self):
-    # queryset = super().get_queryset()
     queryset = Charginginfo.objects.all()
     self.filterset = CharginginfoFilter(self.request.GET, queryset=queryset)
-    
     return self.filterset.qs
 
   def get_context_data(self, **kwargs):
     context = super().get_context_data(**kwargs)
     user_id = self.request.session['user']
     context['loginuser'] = user_id
+    context['form'] = self.filterset.form
     return context
 
 class CharginginfoDetail(DetailView):
