@@ -28,8 +28,14 @@ async def heartbeat_send(cp):
 
 async def main():
 
+    # EVSEP 
+    async with websockets.connect(
+        'ws://34.64.53.253:15000/100001',
+        subprotocols=['ocpp1.6']
+    ) as ws:
+
     # async with websockets.connect(
-    #     'ws://106.10.32.171:9000/webServices/ocpp/202021',
+    #     'ws://106.10.32.171:8000/webServices/ocpp/202021',
     #     subprotocols=['ocpp1.6']
     # ) as ws:
 
@@ -37,10 +43,10 @@ async def main():
     #     'ws://192.168.0.215:8000/webServices/ocpp/202021',
     #     subprotocols=['ocpp1.6']
     # ) as ws:
-    async with websockets.connect(
-        'ws://127.0.0.1:8000/webServices/ocpp/202021',
-        subprotocols=['ocpp1.6']
-    ) as ws:
+    # async with websockets.connect(
+    #     'ws://127.0.0.1:8000/webServices/ocpp/202021',
+    #     subprotocols=['ocpp1.6']
+    # ) as ws:
 
     # async with websockets.connect(
     #     'ws://emcms.watchpoint.co.kr/webServices/ocpp/100198',

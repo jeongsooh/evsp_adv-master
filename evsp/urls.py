@@ -25,6 +25,8 @@ from variables.views import (
     VariablesCreateView, VariablesDeleteView
 )
 
+from evsp import settings
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', index),
@@ -65,3 +67,8 @@ urlpatterns += [
     path('ocpp16/', include('ocpp16.urls')),
     path('clients/', include('clients.urls')),
 ]
+
+# if settings.DEBUG:
+#     import debug_toolbar
+#     urlpatterns += [path('__debug__', include('debug_toolbar.urls'))] 
+    # urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -272,3 +272,46 @@ def my_url(value, field_name, urlencode=None):
       </ul>
     </div>
 ```
+### AWS EC2 publishing
+추가되는 모듈
+```
+$ pip install boto3
+$ pip install django-storages
+```
+static files을 S3에 저장
+```
+$ python manage.py collectstatic
+```
+#### settings.py 분리후 runserver 실행
+settings.py -> settings/base.py
+            -> settings/dev.py
+            -> settings/prod.py
+
+base.py: 공통 내용 정리
+dev.py: dev 단계에서 사용하는 settings
+prod.py: production 단계에서 사용하는 settings
+
+development 단계이면 환경변수를 다음과 같이 설정 후 실행
+```
+$ export DJANGO_SETTINGS_MODULE=evsp.settings.dev
+$ python manage.py runserver
+```
+
+production이면 환경변수를 다음과 같이 설정 후 실행
+```
+$ export DJANGO_SETTINGS_MODULE=evsp.settings.prod
+$ python manage.py runserver
+```
+## Github에 등록
+project 제일 상단 폴더에 각 module의 버전을 정리한 requirements.txt 화일 작성
+```
+Django==4.1.5
+django-debug-toolbar==3.8.1
+# Pillow==6.0.0
+django-storages==1.13.2
+# gunicorn==19.9.0
+boto3==1.26.79
+```
+
+
+
