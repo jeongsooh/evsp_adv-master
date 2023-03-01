@@ -278,6 +278,18 @@ def my_url(value, field_name, urlencode=None):
 $ pip install boto3
 $ pip install django-storages
 ```
+S3에 static 화일 등 저장을 위한 설정 작성
+```
+# AWS S3
+AWS_ACCESS_KEY_ID = 'AKIA4GOZC7MV67ZZHPX4'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_DEFAULT_ACL = 'public-read'
+AWS_REGION = 'us-east-1'
+AWS_STORAGE_BUCKET_NAME = 'jsbucket0120'
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.%s.amazonaws.com' % (AWS_STORAGE_BUCKET_NAME, AWS_REGION)
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+```
 static files을 S3에 저장
 ```
 $ python manage.py collectstatic
@@ -309,9 +321,72 @@ Django==4.1.5
 django-debug-toolbar==3.8.1
 # Pillow==6.0.0
 django-storages==1.13.2
-# gunicorn==19.9.0
+gunicorn==19.9.0
 boto3==1.26.79
 ```
+## EC2 접속 후 설정
+```
+$ ssh -i EC2_connect_sec_key ubuntu@publicdomain  # default user ubuntu로 접속
+```
+```
+$ sudo apt update
+$ sudo apt install git
+$ sudo apt install nginx
+$ sudo apt install python3-pip
+$ sudo apt install vim
+$ sudo su
+# cd /etc/nginx/sites-available
+/etc/nginx/sites-available#
+/etc/nginx/sites-available# mv default default.bak
+```
+백업한 default 대신 reverse proxy 기능을 담은 default 재 작성
+```
+upstream django {
+        server 127.0.0.1:8000;
+}
+
+server {
+        listen 80;
+
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # gunicorn app
+        location / {
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Url-Scheme $scheme;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header Host $http_host;
+
+                proxy_redirect off;
+        }
+}
+
+```
+nginx 실행 후 git clone을 통해서 소스 복사
+```
+/etc/nginx/sites-available# service nginx restart
+/etc/nginx/sites-available# exit
+$ cd
+$ ls
+$ 
+$ git clone https://github.com/jeongsooh/evsp_adv-master.git
+$ cd evsp_adv-master
+$ pip3 install -r requirement.txt
+```
+.bashrc 화일에 django production 환경변수 설정
+```
+$ cd 
+$ vi .bashrc 
+export DJANGO_SETTINGS_MODULE=evsp.settings.prod 
+```
+gunicorn 실행시켜서 wsgi 같은 역할을 구동한다. -D 옵션을 줘서 터미날 빠져도 계속 실행되도록
+```
+$ gunicorn evsp.wsgi -- bind 0.0.0.0:8000 -D
+$
+$
+$ pkill gunicorn
+```
+
 
 
 
